@@ -1,8 +1,7 @@
 package org.unibuc.chirp.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,6 +9,9 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class AppUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -19,9 +21,11 @@ public class AppUser {
     private String password;
 
     @OneToMany(mappedBy = "sender")
+    @Builder.Default
     private List<Message> messageList = new ArrayList<>();
 
     @ManyToMany(mappedBy = "participants")
+    @Builder.Default
     private List<Conversation> conversationList = new ArrayList<>();
 
     @OneToOne(mappedBy = "appUser", cascade = CascadeType.ALL)
