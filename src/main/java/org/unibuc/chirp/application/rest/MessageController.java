@@ -1,13 +1,13 @@
 package org.unibuc.chirp.application.rest;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.unibuc.chirp.domain.service.MessageService;
 
 @RestController
 @RequestMapping("/chirp/api/v1/message")
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class MessageController {
-    private final MessageService messageService;
+    private MessageService messageService;
 }

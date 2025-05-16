@@ -1,7 +1,7 @@
 package org.unibuc.chirp.domain.service;
 
-import org.springframework.stereotype.Service;
+import org.unibuc.chirp.domain.dto.user.create.CreateUserRequestDto;
 
-@Service
 public interface UserService {
+    Boolean createUser(CreateUserRequestDto createUserRequestDto);
 }
