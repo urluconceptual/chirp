@@ -2,6 +2,7 @@ package org.unibuc.chirp.application.rest;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.val;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,10 +20,10 @@ public class UserController {
 
     @PostMapping("/new")
     ResponseEntity<CreateUserResponseDto> createUser(CreateUserRequestDto createUserRequestDto) {
-        userService.createUser(createUserRequestDto);
+        val newUser = userService.createUser(createUserRequestDto);
 
         return ResponseEntity.ok(
-            new CreateUserResponseDto(createUserRequestDto.username())
+            new CreateUserResponseDto(newUser.username())
         );
     }
 }
