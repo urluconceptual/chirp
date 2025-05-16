@@ -16,6 +16,7 @@ public class AppUser {
     private Long id;
 
     private String username;
+    private String password;
 
     @OneToMany(mappedBy = "sender")
     private List<Message> messageList = new ArrayList<>();

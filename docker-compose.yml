@@ -1,0 +1,18 @@
+version: '3.8'
+services:
+  postgres:
+    # todo figure out why this shows something else
+    image: postgres:15
+    container_name: chirp-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: chirp
+    ports:
+      - "5433:5432"
+    networks:
+      - chirp-db-network
+
+networks:
+  chirp-db-network:
+    driver: bridge
