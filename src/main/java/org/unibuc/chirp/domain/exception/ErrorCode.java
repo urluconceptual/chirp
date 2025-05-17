@@ -5,7 +5,8 @@ import lombok.NonNull;
 
 @Getter
 public enum ErrorCode {
-    CHR0001("Username already taken");
+    CHR0001("Username already taken"),
+    CHR0002("User not found");
 
     private final String message;
 

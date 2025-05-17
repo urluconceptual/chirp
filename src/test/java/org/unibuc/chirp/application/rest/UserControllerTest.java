@@ -27,12 +27,20 @@ class UserControllerTest {
     @Autowired
     private AppUserProfileRepository appUserProfileRepository;
 
+    /**
+     * Utilities
+     */
+
     static CreateUserRequestDto getCreateUserRequestDto(String username) {
         return new CreateUserRequestDto(
                 username,
                 "testPassword"
         );
     }
+
+    /**
+     * Dependencies
+     */
 
     @Test
     void shouldInjectDependenciesProperly() {
@@ -45,6 +53,10 @@ class UserControllerTest {
         assertInstanceOf(AppUserRepository.class, appUserRepository,
                 "AppUserRepository should be of type AppUserRepository");
     }
+
+    /**
+     * User creation
+     */
 
     @Test
     void shouldCreateUserWhenUsernameIsNotTakenAndPasswordIsCorrect() {
@@ -90,6 +102,29 @@ class UserControllerTest {
                 "Should throw AppException with error code CHR0001");
 
         assertEquals(ErrorCode.CHR0001.getMessage(), thrownException.getMessage());
+    }
+
+    /**
+     * Get user details
+     */
+
+    @Test
+    void shouldReadUserDataWhenUserExistsInDatabase() {
+        val createUserRequestDto = getCreateUserRequestDto("testUser4");
+        userController.createUser(createUserRequestDto);
+
+        val response = userController.getUserDetails(createUserRequestDto.username());
+
+        assertEquals(HttpStatusCode.valueOf(200), response.getStatusCode(),
+                "Response status code should be 200");
+
+        assertEquals("testUser4", response.getBody().username(),
+                "Response body should contain the created username");
+        assertEquals("testUser4", response.getBody().avatarUrl(),
+                "Response body should contain the created avatar URL");
+        assertEquals("", response.getBody().bio(),
+                "Response body should contain the created bio");
+
     }
 
 }
