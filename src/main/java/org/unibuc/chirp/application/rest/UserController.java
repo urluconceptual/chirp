@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 import org.unibuc.chirp.domain.dto.user.create.CreateUserRequestDto;
 import org.unibuc.chirp.domain.dto.user.create.CreateUserResponseDto;
 import org.unibuc.chirp.domain.dto.user.get.GetUserDetailsResponseDto;
+import org.unibuc.chirp.domain.dto.user.update.UpdateUserRequestDto;
+import org.unibuc.chirp.domain.dto.user.update.UpdateUserResponseDto;
 import org.unibuc.chirp.domain.service.UserService;
 
 @RestController
@@ -19,14 +21,22 @@ public class UserController {
     @PostMapping("/new")
     ResponseEntity<CreateUserResponseDto> createUser(CreateUserRequestDto createUserRequestDto) {
         return ResponseEntity.ok(
-            this.userService.createUser(createUserRequestDto)
+                this.userService.createUser(createUserRequestDto)
         );
     }
 
     @GetMapping("/{username}")
     ResponseEntity<GetUserDetailsResponseDto> getUserDetails(@PathVariable String username) {
         return ResponseEntity.ok(
-            this.userService.getUserDetails(username)
+                this.userService.getUserDetails(username)
+        );
+    }
+
+    @PutMapping("/{username}")
+    ResponseEntity<UpdateUserResponseDto> updateUserDetails(@PathVariable String username,
+                                                            @RequestBody UpdateUserRequestDto updateUserRequestDto) {
+        return ResponseEntity.ok(
+                this.userService.updateUserDetails(username, updateUserRequestDto)
         );
     }
 }

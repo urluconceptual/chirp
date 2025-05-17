@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.test.context.ActiveProfiles;
 import org.unibuc.chirp.domain.dto.user.create.CreateUserRequestDto;
+import org.unibuc.chirp.domain.dto.user.update.UpdateUserRequestDto;
 import org.unibuc.chirp.domain.exception.AppException;
 import org.unibuc.chirp.domain.exception.ErrorCode;
 import org.unibuc.chirp.domain.repository.AppUserProfileRepository;
@@ -127,4 +128,72 @@ class UserControllerTest {
 
     }
 
+    @Test
+    void shouldThrowAppExceptionCHR0002WhenReadingUserDataWithInvalidUsername() {
+        val createUserRequestDto = getCreateUserRequestDto("testUser5");
+        userController.createUser(createUserRequestDto);
+
+        AppException thrownException = assertThrows(AppException.class,
+                () -> userController.getUserDetails("invalidUsername"),
+                "Should throw AppException with error code CHR0002");
+
+        assertEquals(ErrorCode.CHR0002.getMessage(), thrownException.getMessage());
+    }
+
+    /**
+     * Update user bio
+     */
+
+    @Test
+    void shouldUpdateUserBioWhenUserExistsInDatabase() {
+        val createUserRequestDto = getCreateUserRequestDto("testUser6");
+        userController.createUser(createUserRequestDto);
+
+        val updateUserRequestDto = new UpdateUserRequestDto(
+                "test bio"
+        );
+        val response = userController.updateUserDetails("testUser6", updateUserRequestDto);
+
+        assertEquals(HttpStatusCode.valueOf(200), response.getStatusCode(),
+                "Response status code should be 200");
+
+        assertEquals("testUser6", response.getBody().username(),
+                "Response body should contain the created username");
+        assertEquals("testUser6", response.getBody().avatarUrl(),
+                "Response body should contain the created avatar URL");
+        assertEquals("test bio", response.getBody().bio(),
+                "Response body should contain the created bio");
+    }
+
+    @Test
+    void shouldThrowAppExceptionCHR0002WhenUpdatingUserBioWithInvalidUsername() {
+        val createUserRequestDto = getCreateUserRequestDto("testUser7");
+        userController.createUser(createUserRequestDto);
+
+        val updateUserRequestDto = new UpdateUserRequestDto(
+                "test bio"
+        );
+
+        AppException thrownException = assertThrows(AppException.class,
+                () -> userController.updateUserDetails("invalidUsername", updateUserRequestDto),
+                "Should throw AppException with error code CHR0002");
+
+        assertEquals(ErrorCode.CHR0002.getMessage(), thrownException.getMessage());
+    }
+
+    @Test
+    void shouldThrowAppExceptionCHR0003WhenUpdatingUserBioWithNullBio() {
+        val createUserRequestDto = getCreateUserRequestDto("testUser8");
+        userController.createUser(createUserRequestDto);
+
+        val updateUserRequestDto = new UpdateUserRequestDto(
+                null
+        );
+
+        AppException thrownException = assertThrows(AppException.class,
+                () -> userController.updateUserDetails("testUser8", updateUserRequestDto),
+                "Should throw AppException with error code CHR0003");
+
+        assertEquals(ErrorCode.CHR0003.getMessage(), thrownException.getMessage());
+    }
 }
