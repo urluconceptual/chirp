@@ -1,7 +1,12 @@
 package org.unibuc.chirp.application.rest;
 
 import lombok.val;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatusCode;
@@ -18,6 +23,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
+@DisplayName("UserController Tests")
 class UserControllerTest {
     @Autowired
     private UserController userController;
@@ -28,172 +34,182 @@ class UserControllerTest {
     @Autowired
     private AppUserProfileRepository appUserProfileRepository;
 
-    /**
-     * Utilities
-     */
-
-    static CreateUserRequestDto getCreateUserRequestDto(String username) {
+    public static CreateUserRequestDto getCreateUserRequestDto(String username) {
         return new CreateUserRequestDto(
                 username,
                 "testPassword"
         );
     }
 
-    /**
-     * Dependencies
-     */
-
-    @Test
-    void shouldInjectDependenciesProperly() {
-        assertNotNull(userController, "UserController should not be null");
-        assertNotNull(userController.getUserService(), "UserService should not be null");
-        assertNotNull(appUserRepository, "AppUserRepository should not be null");
-
-        assertInstanceOf(UserServiceImpl.class, userController.getUserService(),
-                "UserService should be of type UserServiceImpl");
-        assertInstanceOf(AppUserRepository.class, appUserRepository,
-                "AppUserRepository should be of type AppUserRepository");
+    @BeforeEach
+    void setUp() {
+        appUserProfileRepository.deleteAll();
+        appUserRepository.deleteAll();
     }
 
-    /**
-     * User creation
-     */
-
-    @Test
-    void shouldCreateUserWhenUsernameIsNotTakenAndPasswordIsCorrect() {
-        val createUserRequestDto = getCreateUserRequestDto("testUser");
-
-        val response = userController.createUser(createUserRequestDto);
-
-        assertTrue(appUserRepository.findByUsername("testUser").isPresent(),
-                "User should be created and found in the repository");
-        assertNotNull(response, "Response should not be null");
-
-        assertEquals(HttpStatusCode.valueOf(200), response.getStatusCode(),
-                "Response status code should be 200");
-        assertEquals("testUser", response.getBody().username(),
-                "Response body should contain the created username");
+    @Nested
+    @DisplayName("Dependency Injection Tests")
+    class DependencyInjectionTests {
+        @Test
+        @DisplayName("Should properly inject all dependencies")
+        void shouldInjectDependenciesProperly() {
+            assertAll(
+                    () -> assertNotNull(userController, "UserController should not be null"),
+                    () -> assertNotNull(userController.getUserService(), "UserService should not be null"),
+                    () -> assertNotNull(appUserRepository, "AppUserRepository should not be null"),
+                    () -> assertInstanceOf(UserServiceImpl.class, userController.getUserService(),
+                            "UserService should be of type UserServiceImpl"),
+                    () -> assertInstanceOf(AppUserRepository.class, appUserRepository,
+                            "AppUserRepository should be of type AppUserRepository")
+            );
+        }
     }
 
-    @Test
-    void shouldCreateUserProfileWhenCreatingValidUser() {
-        val createUserRequestDto = getCreateUserRequestDto("testUser2");
+    @Nested
+    @DisplayName("User Creation Tests")
+    class UserCreationTests {
+        @Test
+        @DisplayName("Should successfully create user with valid credentials")
+        void shouldCreateUserSuccessfully() {
+            val createUserRequestDto = getCreateUserRequestDto("testUser");
+            val response = userController.createUser(createUserRequestDto);
 
-        val response = userController.createUser(createUserRequestDto);
+            assertAll(
+                    () -> assertTrue(appUserRepository.findByUsername("testUser").isPresent(),
+                            "User should be created and found in the repository"),
+                    () -> assertNotNull(response, "Response should not be null"),
+                    () -> assertEquals(HttpStatusCode.valueOf(200), response.getStatusCode(),
+                            "Response status code should be 200"),
+                    () -> assertEquals("testUser", response.getBody().username(),
+                            "Response body should contain the created username")
+            );
+        }
 
-        val userProfile =
-                this.appUserProfileRepository.findAppUserProfileByAppUser_Username(response.getBody().username())
-                        .orElseThrow();
+        @Test
+        @DisplayName("Should create user profile when creating valid user")
+        void shouldCreateUserProfile() {
+            val createUserRequestDto = getCreateUserRequestDto("testUser2");
+            val response = userController.createUser(createUserRequestDto);
+            val userProfile = appUserProfileRepository
+                    .findAppUserProfileByAppUser_Username(response.getBody().username())
+                    .orElseThrow();
 
-        assertNotNull(userProfile, "User profile should not be null");
-        assertEquals(createUserRequestDto.username(), userProfile.getAvatarUrl(), "Avatar URL should be equal to " +
-                "username");
-        assertEquals(this.appUserRepository.findByUsername(createUserRequestDto.username()).get(),
-                userProfile.getAppUser(), "AppUser should be the same as the one in profile");
+            assertAll(
+                    () -> assertNotNull(userProfile, "User profile should not be null"),
+                    () -> assertEquals(createUserRequestDto.username(), userProfile.getAvatarUrl(),
+                            "Avatar URL should be equal to username"),
+                    () -> assertEquals(appUserRepository.findByUsername(createUserRequestDto.username()).get(),
+                            userProfile.getAppUser(), "AppUser should be the same as the one in profile")
+            );
+        }
+
+        @Test
+        @DisplayName("Should throw CHR0001 when username is taken")
+        void shouldThrowExceptionForDuplicateUsername() {
+            val createUserRequestDto = getCreateUserRequestDto("testUser3");
+            userController.createUser(createUserRequestDto);
+
+            val thrownException = assertThrows(AppException.class,
+                    () -> userController.createUser(createUserRequestDto),
+                    "Should throw AppException with error code CHR0001");
+
+            assertEquals(ErrorCode.CHR0001.getMessage(), thrownException.getMessage());
+        }
     }
 
-    @Test
-    void shouldThrowAppExceptionCHR0001WhenCreatingUserWithTakenUsername() {
-        val createUserRequestDto = getCreateUserRequestDto("testUser3");
+    @Nested
+    @DisplayName("User Details Tests")
+    class UserDetailsTests {
+        private static final String TEST_USERNAME = "testUser4";
 
-        userController.createUser(createUserRequestDto);
+        @BeforeEach
+        void setUp() {
+            userController.createUser(getCreateUserRequestDto(TEST_USERNAME));
+        }
 
-        AppException thrownException = assertThrows(AppException.class,
-                () -> userController.createUser(createUserRequestDto),
-                "Should throw AppException with error code CHR0001");
+        @Test
+        @DisplayName("Should successfully read existing user data")
+        void shouldReadUserData() {
+            val response = userController.getUserDetails(TEST_USERNAME);
 
-        assertEquals(ErrorCode.CHR0001.getMessage(), thrownException.getMessage());
+            assertAll(
+                    () -> assertEquals(HttpStatusCode.valueOf(200), response.getStatusCode(),
+                            "Response status code should be 200"),
+                    () -> assertEquals(TEST_USERNAME, response.getBody().username(),
+                            "Response body should contain the created username"),
+                    () -> assertEquals(TEST_USERNAME, response.getBody().avatarUrl(),
+                            "Response body should contain the created avatar URL"),
+                    () -> assertEquals("", response.getBody().bio(),
+                            "Response body should contain the created bio")
+            );
+        }
+
+        @Test
+        @DisplayName("Should throw CHR0002 for non-existent username")
+        void shouldThrowExceptionForInvalidUsername() {
+            val invalidUsername = "invalidUsername";
+            val thrownException = assertThrows(AppException.class,
+                    () -> userController.getUserDetails(invalidUsername),
+                    "Should throw AppException with error code CHR0002");
+
+            assertEquals(ErrorCode.CHR0002.getMessage() + ": User with username invalidUsername not found",
+                    thrownException.getMessage());
+        }
     }
 
-    /**
-     * Get user details
-     */
+    @Nested
+    @DisplayName("User Update Tests")
+    class UserUpdateTests {
+        private static final String TEST_USERNAME = "testUser6";
 
-    @Test
-    void shouldReadUserDataWhenUserExistsInDatabase() {
-        val createUserRequestDto = getCreateUserRequestDto("testUser4");
-        userController.createUser(createUserRequestDto);
+        @BeforeEach
+        void setUp() {
+            userController.createUser(getCreateUserRequestDto(TEST_USERNAME));
+        }
 
-        val response = userController.getUserDetails(createUserRequestDto.username());
+        @Test
+        @DisplayName("Should successfully update user bio")
+        void shouldUpdateUserBio() {
+            val updateUserRequestDto = new UpdateUserRequestDto("test bio");
+            val response = userController.updateUserDetails(TEST_USERNAME, updateUserRequestDto);
 
-        assertEquals(HttpStatusCode.valueOf(200), response.getStatusCode(),
-                "Response status code should be 200");
+            assertAll(
+                    () -> assertEquals(HttpStatusCode.valueOf(200), response.getStatusCode(),
+                            "Response status code should be 200"),
+                    () -> assertEquals(TEST_USERNAME, response.getBody().username(),
+                            "Response body should contain the created username"),
+                    () -> assertEquals(TEST_USERNAME, response.getBody().avatarUrl(),
+                            "Response body should contain the created avatar URL"),
+                    () -> assertEquals("test bio", response.getBody().bio(),
+                            "Response body should contain the updated bio")
+            );
+        }
 
-        assertEquals("testUser4", response.getBody().username(),
-                "Response body should contain the created username");
-        assertEquals("testUser4", response.getBody().avatarUrl(),
-                "Response body should contain the created avatar URL");
-        assertEquals("", response.getBody().bio(),
-                "Response body should contain the created bio");
+        @ParameterizedTest
+        @NullSource
+        @DisplayName("Should throw CHR0003 when bio is null or empty")
+        void shouldThrowExceptionForInvalidBio(String invalidBio) {
+            val updateUserRequestDto = new UpdateUserRequestDto(invalidBio);
 
-    }
+            val thrownException = assertThrows(AppException.class,
+                    () -> userController.updateUserDetails(TEST_USERNAME, updateUserRequestDto),
+                    "Should throw AppException with error code CHR0003");
 
-    @Test
-    void shouldThrowAppExceptionCHR0002WhenReadingUserDataWithInvalidUsername() {
-        val createUserRequestDto = getCreateUserRequestDto("testUser5");
-        userController.createUser(createUserRequestDto);
+            assertEquals(ErrorCode.CHR0003.getMessage(), thrownException.getMessage());
+        }
 
-        AppException thrownException = assertThrows(AppException.class,
-                () -> userController.getUserDetails("invalidUsername"),
-                "Should throw AppException with error code CHR0002");
+        @Test
+        @DisplayName("Should throw CHR0002 when updating non-existent user")
+        void shouldThrowExceptionForNonExistentUser() {
+            val updateUserRequestDto = new UpdateUserRequestDto("test bio");
+            val invalidUsername = "invalidUsername";
 
-        assertEquals(ErrorCode.CHR0002.getMessage(), thrownException.getMessage());
-    }
+            val thrownException = assertThrows(AppException.class,
+                    () -> userController.updateUserDetails(invalidUsername, updateUserRequestDto),
+                    "Should throw AppException with error code CHR0002");
 
-    /**
-     * Update user bio
-     */
-
-    @Test
-    void shouldUpdateUserBioWhenUserExistsInDatabase() {
-        val createUserRequestDto = getCreateUserRequestDto("testUser6");
-        userController.createUser(createUserRequestDto);
-
-        val updateUserRequestDto = new UpdateUserRequestDto(
-                "test bio"
-        );
-        val response = userController.updateUserDetails("testUser6", updateUserRequestDto);
-
-        assertEquals(HttpStatusCode.valueOf(200), response.getStatusCode(),
-                "Response status code should be 200");
-
-        assertEquals("testUser6", response.getBody().username(),
-                "Response body should contain the created username");
-        assertEquals("testUser6", response.getBody().avatarUrl(),
-                "Response body should contain the created avatar URL");
-        assertEquals("test bio", response.getBody().bio(),
-                "Response body should contain the created bio");
-    }
-
-    @Test
-    void shouldThrowAppExceptionCHR0002WhenUpdatingUserBioWithInvalidUsername() {
-        val createUserRequestDto = getCreateUserRequestDto("testUser7");
-        userController.createUser(createUserRequestDto);
-
-        val updateUserRequestDto = new UpdateUserRequestDto(
-                "test bio"
-        );
-
-        AppException thrownException = assertThrows(AppException.class,
-                () -> userController.updateUserDetails("invalidUsername", updateUserRequestDto),
-                "Should throw AppException with error code CHR0002");
-
-        assertEquals(ErrorCode.CHR0002.getMessage(), thrownException.getMessage());
-    }
-
-    @Test
-    void shouldThrowAppExceptionCHR0003WhenUpdatingUserBioWithNullBio() {
-        val createUserRequestDto = getCreateUserRequestDto("testUser8");
-        userController.createUser(createUserRequestDto);
-
-        val updateUserRequestDto = new UpdateUserRequestDto(
-                null
-        );
-
-        AppException thrownException = assertThrows(AppException.class,
-                () -> userController.updateUserDetails("testUser8", updateUserRequestDto),
-                "Should throw AppException with error code CHR0003");
-
-        assertEquals(ErrorCode.CHR0003.getMessage(), thrownException.getMessage());
+            assertEquals(ErrorCode.CHR0002.getMessage() + ": User with username invalidUsername not found",
+                    thrownException.getMessage());
+        }
     }
 }
