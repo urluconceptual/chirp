@@ -7,6 +7,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.test.context.ActiveProfiles;
 import org.unibuc.chirp.domain.dto.user.create.CreateUserRequestDto;
+import org.unibuc.chirp.domain.exception.AppException;
+import org.unibuc.chirp.domain.exception.ErrorCode;
 import org.unibuc.chirp.domain.repository.AppUserProfileRepository;
 import org.unibuc.chirp.domain.repository.AppUserRepository;
 import org.unibuc.chirp.impl.service.UserServiceImpl;
@@ -25,21 +27,28 @@ class UserControllerTest {
     @Autowired
     private AppUserProfileRepository appUserProfileRepository;
 
+    static CreateUserRequestDto getCreateUserRequestDto(String username) {
+        return new CreateUserRequestDto(
+                username,
+                "testPassword"
+        );
+    }
+
     @Test
     void shouldInjectDependenciesProperly() {
         assertNotNull(userController, "UserController should not be null");
         assertNotNull(userController.getUserService(), "UserService should not be null");
+        assertNotNull(appUserRepository, "AppUserRepository should not be null");
 
         assertInstanceOf(UserServiceImpl.class, userController.getUserService(),
                 "UserService should be of type UserServiceImpl");
+        assertInstanceOf(AppUserRepository.class, appUserRepository,
+                "AppUserRepository should be of type AppUserRepository");
     }
 
     @Test
     void shouldCreateUserWhenUsernameIsNotTakenAndPasswordIsCorrect() {
-        val createUserRequestDto = new CreateUserRequestDto(
-                "testUser",
-                "testPassword"
-        );
+        val createUserRequestDto = getCreateUserRequestDto("testUser");
 
         val response = userController.createUser(createUserRequestDto);
 
@@ -55,10 +64,7 @@ class UserControllerTest {
 
     @Test
     void shouldCreateUserProfileWhenCreatingValidUser() {
-        val createUserRequestDto = new CreateUserRequestDto(
-                "testUser2",
-                "testPassword"
-        );
+        val createUserRequestDto = getCreateUserRequestDto("testUser2");
 
         val response = userController.createUser(createUserRequestDto);
 
@@ -71,6 +77,19 @@ class UserControllerTest {
                 "username");
         assertEquals(this.appUserRepository.findByUsername(createUserRequestDto.username()).get(),
                 userProfile.getAppUser(), "AppUser should be the same as the one in profile");
+    }
+
+    @Test
+    void shouldThrowAppExceptionCHR0001WhenCreatingUserWithTakenUsername() {
+        val createUserRequestDto = getCreateUserRequestDto("testUser3");
+
+        userController.createUser(createUserRequestDto);
+
+        AppException thrownException = assertThrows(AppException.class,
+                () -> userController.createUser(createUserRequestDto),
+                "Should throw AppException with error code CHR0001");
+
+        assertEquals(ErrorCode.CHR0001.getMessage(), thrownException.getMessage());
     }
 
 }
