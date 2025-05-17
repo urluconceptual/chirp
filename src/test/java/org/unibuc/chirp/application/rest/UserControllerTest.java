@@ -32,7 +32,7 @@ class UserControllerTest {
      * Utilities
      */
 
-    static CreateUserRequestDto getCreateUserRequestDto(String username) {
+    public static CreateUserRequestDto getCreateUserRequestDto(String username) {
         return new CreateUserRequestDto(
                 username,
                 "testPassword"
@@ -137,7 +137,8 @@ class UserControllerTest {
                 () -> userController.getUserDetails("invalidUsername"),
                 "Should throw AppException with error code CHR0002");
 
-        assertEquals(ErrorCode.CHR0002.getMessage(), thrownException.getMessage());
+        assertEquals(ErrorCode.CHR0002.getMessage() + ": User with username invalidUsername not found",
+                thrownException.getMessage());
     }
 
     /**
@@ -178,7 +179,8 @@ class UserControllerTest {
                 () -> userController.updateUserDetails("invalidUsername", updateUserRequestDto),
                 "Should throw AppException with error code CHR0002");
 
-        assertEquals(ErrorCode.CHR0002.getMessage(), thrownException.getMessage());
+        assertEquals(ErrorCode.CHR0002.getMessage() + ": User with username invalidUsername not found",
+                thrownException.getMessage());
     }
 
     @Test

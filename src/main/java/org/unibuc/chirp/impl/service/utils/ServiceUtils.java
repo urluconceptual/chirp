@@ -2,11 +2,13 @@ package org.unibuc.chirp.impl.service.utils;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.unibuc.chirp.domain.dto.conversation.create.CreateConversationResponseDto;
 import org.unibuc.chirp.domain.dto.user.create.CreateUserResponseDto;
 import org.unibuc.chirp.domain.dto.user.get.GetUserDetailsResponseDto;
 import org.unibuc.chirp.domain.dto.user.update.UpdateUserResponseDto;
 import org.unibuc.chirp.domain.entity.AppUser;
 import org.unibuc.chirp.domain.entity.AppUserProfile;
+import org.unibuc.chirp.domain.entity.Conversation;
 
 @Slf4j
 @UtilityClass
@@ -30,6 +32,13 @@ public class ServiceUtils {
                 userProfile.getAppUser().getUsername(),
                 userProfile.getAvatarUrl(),
                 userProfile.getBio()
+        );
+    }
+
+    public static CreateConversationResponseDto toDto(Conversation conversation) {
+        return new CreateConversationResponseDto(
+                conversation.getId(),
+                conversation.getTitle()
         );
     }
 }
