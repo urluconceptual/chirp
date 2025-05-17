@@ -18,4 +18,10 @@ public class UserValidator {
             throw new AppException(ErrorCode.CHR0001);
         }
     }
+
+    public void validate(String username) throws AppException {
+        if (this.userRepository.findByUsername(username).isEmpty()) {
+            throw new AppException(ErrorCode.CHR0002);
+        }
+    }
 }

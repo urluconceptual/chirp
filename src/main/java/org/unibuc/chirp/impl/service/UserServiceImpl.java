@@ -6,6 +6,7 @@ import lombok.val;
 import org.springframework.stereotype.Service;
 import org.unibuc.chirp.domain.dto.user.create.CreateUserRequestDto;
 import org.unibuc.chirp.domain.dto.user.create.CreateUserResponseDto;
+import org.unibuc.chirp.domain.dto.user.get.GetUserDetailsResponseDto;
 import org.unibuc.chirp.domain.entity.AppUser;
 import org.unibuc.chirp.domain.entity.AppUserProfile;
 import org.unibuc.chirp.domain.repository.AppUserProfileRepository;
@@ -42,6 +43,15 @@ public class UserServiceImpl implements UserService {
                 .build()
         );
 
-        return ServiceUtils.toDto(savedUser);
+        return ServiceUtils.toCreateUserResponseDto(savedUser);
+    }
+
+    @Override
+    public GetUserDetailsResponseDto getUserDetails(String username) {
+        userValidator.validate(username);
+
+        val user = this.userRepository.findByUsername(username).get();
+
+        return ServiceUtils.toGetUserDetailsResponseDto(user);
     }
 }

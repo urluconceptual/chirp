@@ -2,13 +2,11 @@ package org.unibuc.chirp.application.rest;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.val;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.unibuc.chirp.domain.dto.user.create.CreateUserRequestDto;
 import org.unibuc.chirp.domain.dto.user.create.CreateUserResponseDto;
+import org.unibuc.chirp.domain.dto.user.get.GetUserDetailsResponseDto;
 import org.unibuc.chirp.domain.service.UserService;
 
 @RestController
@@ -20,10 +18,15 @@ public class UserController {
 
     @PostMapping("/new")
     ResponseEntity<CreateUserResponseDto> createUser(CreateUserRequestDto createUserRequestDto) {
-        val newUser = userService.createUser(createUserRequestDto);
-
         return ResponseEntity.ok(
-            new CreateUserResponseDto(newUser.username())
+            this.userService.createUser(createUserRequestDto)
+        );
+    }
+
+    @GetMapping("/{username}")
+    ResponseEntity<GetUserDetailsResponseDto> getUserDetails(@PathVariable String username) {
+        return ResponseEntity.ok(
+            this.userService.getUserDetails(username)
         );
     }
 }

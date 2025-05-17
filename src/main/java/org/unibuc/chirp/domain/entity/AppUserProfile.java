@@ -17,7 +17,9 @@ public class AppUserProfile {
     private Long id;
 
     private String avatarUrl;
-    private String bio;
+
+    @Builder.Default
+    private String bio = "";
 
     @OneToOne
     @MapsId
