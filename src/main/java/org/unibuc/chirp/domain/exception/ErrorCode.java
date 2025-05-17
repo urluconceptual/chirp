@@ -6,7 +6,9 @@ import lombok.NonNull;
 @Getter
 public enum ErrorCode {
     CHR0001("Username already taken"),
-    CHR0002("User not found");
+    CHR0002("User not found"),
+    CHR0003("Bio cannot be null"),
+    CHR0004("User profile not found"),;
 
     private final String message;
 

@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.unibuc.chirp.domain.dto.user.create.CreateUserRequestDto;
 import org.unibuc.chirp.domain.dto.user.create.CreateUserResponseDto;
 import org.unibuc.chirp.domain.dto.user.get.GetUserDetailsResponseDto;
+import org.unibuc.chirp.domain.dto.user.update.UpdateUserRequestDto;
+import org.unibuc.chirp.domain.dto.user.update.UpdateUserResponseDto;
 import org.unibuc.chirp.domain.entity.AppUser;
 import org.unibuc.chirp.domain.entity.AppUserProfile;
 import org.unibuc.chirp.domain.repository.AppUserProfileRepository;
@@ -53,5 +55,19 @@ public class UserServiceImpl implements UserService {
         val user = this.userRepository.findByUsername(username).get();
 
         return ServiceUtils.toGetUserDetailsResponseDto(user);
+    }
+
+    @Override
+    public UpdateUserResponseDto updateUserDetails(String username, UpdateUserRequestDto updateUserRequestDto) {
+        userValidator.validate(username);
+        userValidator.validate(updateUserRequestDto);
+
+        val userProfile = this.userProfileRepository.findAppUserProfileByAppUser_Username(username).get();
+
+        userProfile.setBio(updateUserRequestDto.updatedBio());
+
+        this.userProfileRepository.save(userProfile);
+
+        return ServiceUtils.toDto(userProfile);
     }
 }
