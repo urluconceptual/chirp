@@ -2,6 +2,7 @@ package org.unibuc.chirp.impl.service.utils;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.unibuc.chirp.domain.dto.conversation.create.CreateConversationResponseDto;
 import org.unibuc.chirp.domain.dto.conversation.get.GetConversationResponseDto;
 import org.unibuc.chirp.domain.dto.message.get.GetMessageResponseDto;
@@ -45,14 +46,14 @@ public class ServiceUtils {
         );
     }
 
-    public static GetConversationResponseDto toDtoGetConversation(Conversation conversation) {
+    public static GetConversationResponseDto toDtoGetConversation(Conversation conversation, Page<Message> messagePage) {
         return new GetConversationResponseDto(
                 conversation.getId(),
                 conversation.getTitle(),
                 conversation.getParticipants().stream()
                         .map(AppUser::getUsername)
                         .toList(),
-                conversation.getMessageList().stream()
+                messagePage.getContent().stream()
                         .map(ServiceUtils::toDto)
                         .toList()
         );

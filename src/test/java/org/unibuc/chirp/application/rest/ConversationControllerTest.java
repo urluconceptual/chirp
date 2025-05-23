@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.unibuc.chirp.domain.dto.conversation.create.CreateConversationRequestDto;
+import org.unibuc.chirp.domain.dto.conversation.get.GetConversationRequestDto;
 import org.unibuc.chirp.domain.dto.user.create.CreateUserRequestDto;
 import org.unibuc.chirp.domain.entity.AppUser;
 import org.unibuc.chirp.domain.entity.Conversation;
@@ -205,7 +206,7 @@ class ConversationControllerTest {
 
         @Test
         void shouldGetConversationWhenIdIsFine() {
-            val response = conversationController.getConversation(conversation.getId());
+            val response = conversationController.getConversation(conversation.getId(), new GetConversationRequestDto(0, 20));
 
             assertAll(
                     () -> assertNotNull(response, "Response should not be null"),
@@ -214,9 +215,9 @@ class ConversationControllerTest {
                     () -> assertEquals(conversation.getTitle(), response.getBody().title(), "Title should match"),
                     () -> assertEquals(conversation.getMessageList().size(), response.getBody().messages().size(), "Messages size should match"),
                     () -> assertEquals(List.of(firstUser.getUsername(), secondUser.getUsername()), response.getBody().participantList()),
-                    () -> assertEquals(firstMessage.getContent(), response.getBody().messages().get(0).content(),
+                    () -> assertEquals(conversation.getMessageList().reversed().get(0).getContent(), response.getBody().messages().get(0).content(),
                             "First message content should match"),
-                    () -> assertEquals(secondMessage.getContent(), response.getBody().messages().get(1).content(),
+                    () -> assertEquals(conversation.getMessageList().reversed().get(1).getContent(), response.getBody().messages().get(1).content(),
                             "Second message content should match")
             );
         }
@@ -224,12 +225,35 @@ class ConversationControllerTest {
         @Test
         void shouldThrowAppExceptionWhenConversationNotFound() {
             AppException exception = assertThrows(AppException.class,
-                    () -> conversationController.getConversation(999L),
+                    () -> conversationController.getConversation(999L, new GetConversationRequestDto(0, 20)),
                     "Should throw AppException when conversation not found"
             );
 
             assertAll(
                     () -> assertEquals(ErrorCode.CHR0007.getMessage(), exception.getMessage(), "Error message should match")
+            );
+        }
+
+        @Test
+        void shouldPaginateMessagesCorrectly() {
+            val response = conversationController.getConversation(conversation.getId(), new GetConversationRequestDto(0, 1));
+
+            assertAll(
+                    () -> assertNotNull(response, "Response should not be null"),
+                    () -> assertNotNull(response.getBody(), "Response body should not be null"),
+                    () -> assertEquals(1, response.getBody().messages().size(), "Should return only one message"),
+                    () -> assertEquals(secondMessage.getContent(), response.getBody().messages().get(0).content(),
+                            "First message content should match")
+            );
+
+            val response2 = conversationController.getConversation(conversation.getId(), new GetConversationRequestDto(1, 1));
+
+            assertAll(
+                    () -> assertNotNull(response2, "Response should not be null"),
+                    () -> assertNotNull(response2.getBody(), "Response body should not be null"),
+                    () -> assertEquals(1, response2.getBody().messages().size(), "Should return only one message"),
+                    () -> assertEquals(firstMessage.getContent(), response2.getBody().messages().get(0).content(),
+                            "Second message content should match")
             );
         }
     }

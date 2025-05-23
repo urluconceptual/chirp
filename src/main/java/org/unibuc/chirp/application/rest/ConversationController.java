@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.unibuc.chirp.domain.dto.conversation.create.CreateConversationRequestDto;
 import org.unibuc.chirp.domain.dto.conversation.create.CreateConversationResponseDto;
+import org.unibuc.chirp.domain.dto.conversation.get.GetConversationRequestDto;
 import org.unibuc.chirp.domain.dto.conversation.get.GetConversationResponseDto;
 import org.unibuc.chirp.domain.service.ConversationService;
 
@@ -27,9 +28,9 @@ public class ConversationController {
 
     @GetMapping("/{conversationId}")
     public ResponseEntity<GetConversationResponseDto> getConversation(
-            @PathVariable Long conversationId) {
+            @PathVariable Long conversationId, @RequestBody GetConversationRequestDto getConversationRequestDto) {
         return ResponseEntity.ok(
-                conversationService.getConversation(conversationId)
+                conversationService.getConversation(conversationId, getConversationRequestDto)
         );
     }
 }
