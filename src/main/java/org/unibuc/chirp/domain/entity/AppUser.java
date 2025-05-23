@@ -32,6 +32,13 @@ public class AppUser {
     @OneToOne(mappedBy = "appUser", cascade = CascadeType.ALL)
     private AppUserProfile appUserProfile;
 
+    @OneToMany(mappedBy = "requester")
+    @Builder.Default
+    private List<UserFriend> sentFriendRequests = new ArrayList<>();
+
+    @OneToMany(mappedBy = "addressee")
+    @Builder.Default
+    private List<UserFriend> receivedFriendRequests = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {
