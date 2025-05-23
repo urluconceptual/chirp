@@ -1,6 +1,7 @@
 package org.unibuc.chirp.application.rest;
 
 import lombok.AllArgsConstructor;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.unibuc.chirp.domain.service.MessageService;

@@ -10,7 +10,8 @@ public enum ErrorCode {
     CHR0003("Bio cannot be null"),
     CHR0004("User profile not found"),
     CHR0005("Conversation title cannot be empty"),
-    CHR0006("Conversation title too long"),;
+    CHR0006("Conversation title too long"),
+    CHR0007("Conversation ID not found"),;
 
     private final String message;
 
