@@ -27,7 +27,9 @@ public class UserFriendshipEntity {
     @Enumerated(EnumType.STRING)
     private FriendshipStatus status;
 
+    @Column(name = "requested_at")
     private LocalDateTime requestedAt;
+    @Column(name = "responded_at")
     private LocalDateTime respondedAt;
 
     public enum FriendshipStatus {

@@ -27,4 +27,14 @@ public class FriendValidator {
             throw new IllegalArgumentException("Friendship request must have both requester and addressee set");
         }
     }
+
+    public void validateRemove(UserFriendshipEntity friendship) {
+        if (friendship.getStatus() != UserFriendshipEntity.FriendshipStatus.ACCEPTED) {
+            throw new IllegalArgumentException("Friendship is not in ACCEPTED status");
+        }
+
+        if (friendship.getAddressee() == null || friendship.getRequester() == null) {
+            throw new IllegalArgumentException("Friendship must have both requester and addressee set");
+        }
+    }
 }

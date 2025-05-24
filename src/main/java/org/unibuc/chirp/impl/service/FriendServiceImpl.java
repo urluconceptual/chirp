@@ -6,25 +6,17 @@ import lombok.val;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
 import org.unibuc.chirp.domain.dto.user.get.GetUserDetailsResponseDto;
-import org.unibuc.chirp.domain.dto.user.update.UpdateUserRequestDto;
-import org.unibuc.chirp.domain.dto.user.update.UpdateUserResponseDto;
 import org.unibuc.chirp.domain.entity.UserFriendshipEntity;
 import org.unibuc.chirp.domain.repository.UserFriendshipRepository;
-import org.unibuc.chirp.domain.repository.UserProfileRepository;
 import org.unibuc.chirp.domain.repository.UserRepository;
 import org.unibuc.chirp.domain.service.FriendService;
-import org.unibuc.chirp.domain.service.UserService;
 import org.unibuc.chirp.impl.service.utils.ServiceUtils;
 import org.unibuc.chirp.impl.validator.FriendValidator;
 import org.unibuc.chirp.impl.validator.UserValidator;
 
-import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Base64;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -55,14 +47,7 @@ public class FriendServiceImpl implements FriendService {
 
     @Override
     public void acceptFriendRequest(String currentUsername, String targetUsername) {
-        this.userValidator.validate(currentUsername);
-        this.userValidator.validate(targetUsername);
-
-        val requester = this.userRepository.findByUsername(currentUsername).get();
-        val addressee = this.userRepository.findByUsername(targetUsername).get();
-
-        val friendshipRequest = this.userFriendshipRepository.findByRequesterAndAddressee(requester, addressee)
-                .orElseThrow();
+        UserFriendshipEntity friendshipRequest = getFriendship(currentUsername, targetUsername);
 
         this.friendValidator.validateAccept(friendshipRequest);
 
@@ -74,14 +59,7 @@ public class FriendServiceImpl implements FriendService {
 
     @Override
     public void rejectFriendRequest(String currentUsername, String targetUsername) {
-        this.userValidator.validate(currentUsername);
-        this.userValidator.validate(targetUsername);
-
-        val requester = this.userRepository.findByUsername(currentUsername).get();
-        val addressee = this.userRepository.findByUsername(targetUsername).get();
-
-        val friendshipRequest = this.userFriendshipRepository.findByRequesterAndAddressee(requester, addressee)
-                .orElseThrow();
+        UserFriendshipEntity friendshipRequest = getFriendship(currentUsername, targetUsername);
 
         this.friendValidator.validateReject(friendshipRequest);
 
@@ -92,11 +70,32 @@ public class FriendServiceImpl implements FriendService {
     }
 
     @Override
+    public void removeFriend(String currentUsername, String targetUsername) {
+        UserFriendshipEntity friendship = this.getFriendship(currentUsername, targetUsername);
+
+        this.friendValidator.validateRemove(friendship);
+
+        this.userFriendshipRepository.delete(friendship);
+    }
+
+    private UserFriendshipEntity getFriendship(String currentUsername, String targetUsername) {
+        this.userValidator.validate(currentUsername);
+        this.userValidator.validate(targetUsername);
+
+        val requester = this.userRepository.findByUsername(currentUsername).get();
+        val addressee = this.userRepository.findByUsername(targetUsername).get();
+
+        return this.userFriendshipRepository.findByUsers(requester, addressee)
+                .orElseThrow();
+    }
+
+    @Override
     public Page<GetUserDetailsResponseDto> getFriends(String username, Pageable pageable) {
         this.userValidator.validate(username);
 
         val user = this.userRepository.findByUsername(username).orElseThrow();
-        val friends = this.userFriendshipRepository.findByRequesterOrAddressee(user, user, pageable);
+        val friends = this.userFriendshipRepository.findByUserAndStatus(user, UserFriendshipEntity.FriendshipStatus.ACCEPTED,
+                pageable);
 
         return friends.map(friendship -> {
             val friend = friendship.getRequester().equals(user) ? friendship.getAddressee() : friendship.getRequester();
@@ -106,7 +105,14 @@ public class FriendServiceImpl implements FriendService {
     }
 
     @Override
-    public Page<GetUserDetailsResponseDto> getFriendRequests(String username, Pageable pageable) {
-        return null;
+    public List<GetUserDetailsResponseDto> getFriendRequests(String username) {
+        this.userValidator.validate(username);
+
+        val user = this.userRepository.findByUsername(username).orElseThrow();
+        val friendRequests = this.userFriendshipRepository.findByAddresseeAndStatus(user, UserFriendshipEntity.FriendshipStatus.PENDING);
+
+        return friendRequests.stream()
+                .map(friendship -> ServiceUtils.toGetUserDetailsResponseDto(friendship.getRequester()))
+                .toList();
     }
 }

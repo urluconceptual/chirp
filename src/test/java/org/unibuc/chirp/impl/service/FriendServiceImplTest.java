@@ -1,6 +1,5 @@
 package org.unibuc.chirp.impl.service;
 
-import jakarta.transaction.Transactional;
 import lombok.val;
 import org.h2.tools.Server;
 import org.junit.jupiter.api.*;
@@ -95,7 +94,7 @@ class FriendServiceImplTest {
 
             friendService.sendFriendRequest(currentUsername, targetUsername);
 
-            assertTrue(userFriendshipRepository.findByRequesterAndAddressee(
+            assertTrue(userFriendshipRepository.findByUsers(
                     firstUser, secondUser).isPresent(), "Friend request should be created");
         }
 
@@ -127,7 +126,7 @@ class FriendServiceImplTest {
 
             friendService.acceptFriendRequest(currentUsername, targetUsername);
 
-            assertEquals(UserFriendshipEntity.FriendshipStatus.ACCEPTED, userFriendshipRepository.findByRequesterAndAddressee(
+            assertEquals(UserFriendshipEntity.FriendshipStatus.ACCEPTED, userFriendshipRepository.findByUsers(
                             firstUser, secondUser).get().getStatus(),
                     "Friend request should be accepted");
         }
@@ -146,7 +145,7 @@ class FriendServiceImplTest {
 
             friendService.rejectFriendRequest(currentUsername, targetUsername);
 
-            val friendshipRequest = userFriendshipRepository.findByRequesterAndAddressee(firstUser, secondUser);
+            val friendshipRequest = userFriendshipRepository.findByUsers(firstUser, secondUser);
 
             assertNotNull(friendshipRequest.get(), "Friend request should not be null");
             assertEquals(UserFriendshipEntity.FriendshipStatus.REJECTED, friendshipRequest.get().getStatus(),

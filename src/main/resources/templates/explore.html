@@ -38,7 +38,7 @@
         <div class="col-md-2 sidebar">
             <h4 class="p-3">Chirp</h4>
             <a th:href="@{/chat}">Chats</a>
-            <a th:href="@{/friends}">My Friends</a>
+            <a th:href="@{/friend/all}">My Friends</a>
             <a class="active" th:href="@{/account/explore}">Explore</a>
             <a th:href="@{/account/my-account}">My Account</a>
         </div>
@@ -74,13 +74,13 @@
 
                                     <div>
                                         <div th:switch="${user.friendStatus}">
-                                            <form th:case="'NOT_FRIEND'" th:action="@{account/friends/add}" method="post">
+                                            <form th:case="'NOT_FRIEND'" th:action="@{/friend/add}" method="post">
                                                 <input type="hidden" name="username" th:value="${user.username}"/>
                                                 <button type="submit" class="btn btn-outline-primary">Add Friend
                                                 </button>
                                             </form>
 
-                                            <form th:case="'FRIEND'" th:action="@{account/friends/remove}" method="post">
+                                            <form th:case="'FRIEND'" th:action="@{/friend/remove}" method="post">
                                                 <input type="hidden" name="username" th:value="${user.username}"/>
                                                 <button type="submit" class="btn btn-outline-danger">Remove Friend
                                                 </button>
