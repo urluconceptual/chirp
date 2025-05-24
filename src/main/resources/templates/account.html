@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>My Account - Chirp</title>
+    <title>See Account - Chirp</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         .sidebar {
@@ -42,7 +42,7 @@
         </div>
 
         <div class="col-md-10 mt-3">
-            <h2>My Account</h2>
+            <h2>Explore Account</h2>
             <div class="card mt-4">
                 <div class="card-body">
                     <div class="mb-3 text-center">
@@ -55,9 +55,22 @@
 
                         <p class="text-muted" th:text="'Friends: ' + ${user.numberOfFriends}">Friends: 0</p>
 
-                        <a th:href="@{/account/my-account/edit}" class="btn btn-primary mt-3">Edit My Profile</a>
-                        <a th:href="@{/account/my-account/edit}" class="btn btn-secondary mt-3">Change Username or
-                            Password</a>
+                        <div th:switch="${user.friendStatus}">
+                            <form th:case="'NOT_FRIEND'" th:action="@{/friends/add}" method="post">
+                                <input type="hidden" name="userId" th:value="${user.username}"/>
+                                <button type="submit" class="btn btn-outline-primary">Add Friend
+                                </button>
+                            </form>
+
+                            <form th:case="'FRIEND'" th:action="@{/friends/remove}" method="post">
+                                <input type="hidden" name="userId" th:value="${user.username}"/>
+                                <button type="submit" class="btn btn-outline-danger">Remove Friend
+                                </button>
+                            </form>
+
+                            <span th:case="'PENDING'" class="text-muted">Pending friend request</span>
+                            <span th:case="'REJECTED'" class="text-muted">Rejected friend request</span>
+                        </div>
                     </div>
 
                     <p th:if="${user.bio != null && user.bio.length() != 0}"><strong>Bio:</strong>

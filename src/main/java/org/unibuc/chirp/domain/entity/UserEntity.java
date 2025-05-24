@@ -2,6 +2,7 @@ package org.unibuc.chirp.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Fetch;
 
 import java.util.*;
 
@@ -40,11 +41,11 @@ public class UserEntity {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private UserProfileEntity userProfile;
 
-    @OneToMany(mappedBy = "requester")
+    @OneToMany(mappedBy = "requester", fetch = FetchType.EAGER)
     @Builder.Default
     private List<UserFriendshipEntity> sentFriendRequests = new ArrayList<>();
 
-    @OneToMany(mappedBy = "addressee")
+    @OneToMany(mappedBy = "addressee", fetch = FetchType.EAGER)
     @Builder.Default
     private List<UserFriendshipEntity> receivedFriendRequests = new ArrayList<>();
 

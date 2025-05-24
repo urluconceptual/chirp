@@ -38,7 +38,7 @@
         <div class="col-md-2 sidebar">
             <h4 class="p-3">Chirp</h4>
             <a th:href="@{/chat}">Chats</a>
-            <a th:href="@{/friends}">My Friends</a>
+            <a th:href="@{/friend/all}">My Friends</a>
             <a class="active" th:href="@{/account/explore}">Explore</a>
             <a th:href="@{/account/my-account}">My Account</a>
         </div>
@@ -49,7 +49,8 @@
                 <div class="card-body">
                     <div class="mb-3 text-center">
                         <form th:action="@{/account/explore}" method="get" class="mb-3">
-                            <input type="text" name="search" th:value="${search}" placeholder="Search by username..." class="form-control"/>
+                            <input type="text" name="search" th:value="${search}" placeholder="Search by username..."
+                                   class="form-control"/>
                         </form>
 
                         <div th:if="${users.content.empty}" class="text-muted mt-3">No users found.</div>
@@ -62,21 +63,27 @@
                                              class="rounded-circle me-3"
                                              style="width: 50px; height: 50px; object-fit: cover;"/>
                                         <div>
-                                            <h5 th:text="${user.username}">Username</h5>
-                                            <p th:text="${user.bio != null ? user.bio : 'No bio'}" class="mb-0 text-muted"></p>
+                                            <h5>
+                                                <a th:href="@{/account/{username}(username=${user.username})}"
+                                                   th:text="${user.username}" class="text-decoration-none"></a>
+                                            </h5>
+                                            <p th:text="${user.bio != null ? user.bio : 'No bio'}"
+                                               class="mb-0 text-muted"></p>
                                         </div>
                                     </div>
 
                                     <div>
                                         <div th:switch="${user.friendStatus}">
-                                            <form th:case="'NOT_FRIEND'" th:action="@{/friends/add}" method="post">
-                                                <input type="hidden" name="userId" th:value="${user.username}"/>
-                                                <button type="submit" class="btn btn-outline-primary">Add Friend</button>
+                                            <form th:case="'NOT_FRIEND'" th:action="@{/friend/add}" method="post">
+                                                <input type="hidden" name="username" th:value="${user.username}"/>
+                                                <button type="submit" class="btn btn-outline-primary">Add Friend
+                                                </button>
                                             </form>
 
-                                            <form th:case="'FRIEND'" th:action="@{/friends/remove}" method="post">
-                                                <input type="hidden" name="userId" th:value="${user.username}"/>
-                                                <button type="submit" class="btn btn-outline-danger">Remove Friend</button>
+                                            <form th:case="'FRIEND'" th:action="@{/friend/remove}" method="post">
+                                                <input type="hidden" name="username" th:value="${user.username}"/>
+                                                <button type="submit" class="btn btn-outline-danger">Remove Friend
+                                                </button>
                                             </form>
 
                                             <span th:case="'PENDING'" class="text-muted">Pending friend request</span>
@@ -91,7 +98,8 @@
                             <ul class="pagination mt-3">
                                 <li class="page-item" th:each="i : ${#numbers.sequence(0, users.totalPages - 1)}"
                                     th:classappend="${users.number == i} ? 'active'">
-                                    <a class="page-link" th:href="@{/account/explore(page=${i}, search=${search})}" th:text="${i + 1}">1</a>
+                                    <a class="page-link" th:href="@{/account/explore(page=${i}, search=${search})}"
+                                       th:text="${i + 1}">1</a>
                                 </li>
                             </ul>
                         </nav>

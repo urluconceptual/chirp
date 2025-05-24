@@ -28,12 +28,26 @@ public class AccountController {
     private UserService userService;
 
     @GetMapping("/my-account")
-    public String showAccountPage(Model model) {
+    public String showMyAccountPage(Model model) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
         GetUserDetailsResponseDto user = userService.getUserDetails(username);
         model.addAttribute("user", user);
         return "my-account";
+    }
+
+    @GetMapping("/{username}")
+    public String showAccountPage(@PathVariable String username, Model model) {
+        GetUserDetailsResponseDto user = userService.getUserDetails(username);
+        model.addAttribute("user", user);
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        if (username.equals(currentUsername)) {
+            return "redirect:/account/my-account";
+        }
+
+        return "account";
     }
 
     @GetMapping("/my-account/edit")
@@ -77,12 +91,5 @@ public class AccountController {
         model.addAttribute("search", search);
 
         return "explore";
-    }
-
-    @GetMapping("/{username}")
-    ResponseEntity<GetUserDetailsResponseDto> getUserDetails(@PathVariable String username) {
-        return ResponseEntity.ok(
-                this.userService.getUserDetails(username)
-        );
     }
 }

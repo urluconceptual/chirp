@@ -49,7 +49,7 @@ public class AuthServiceImpl implements AuthService {
                 .roles(Set.of(role))
                 .build());
 
-        val savedUser = this.userRepository.findByUsername(createUserRequestDto.username())
+        UserEntity savedUser = this.userRepository.findByUsername(createUserRequestDto.username())
                 .orElseThrow();
 
         this.userProfileRepository.save(UserProfileEntity.builder()

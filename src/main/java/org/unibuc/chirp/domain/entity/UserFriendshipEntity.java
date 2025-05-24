@@ -1,14 +1,16 @@
 package org.unibuc.chirp.domain.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
 @Entity(name = "user_friendships")
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserFriendshipEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,7 +27,9 @@ public class UserFriendshipEntity {
     @Enumerated(EnumType.STRING)
     private FriendshipStatus status;
 
+    @Column(name = "requested_at")
     private LocalDateTime requestedAt;
+    @Column(name = "responded_at")
     private LocalDateTime respondedAt;
 
     public enum FriendshipStatus {

@@ -28,18 +28,24 @@ public class ServiceUtils {
                 .filter(request -> request.getStatus().equals(
                         UserFriendshipEntity.FriendshipStatus.ACCEPTED)).toList().size();
 
-        FriendStatus friendStatus = Stream.concat(userEntity.getSentFriendRequests().stream(),
-                        userEntity.getReceivedFriendRequests().stream())
-                .filter(request -> request.getRequester().getUsername().equals(currentUserUsername) ||
-                        request.getAddressee().getUsername().equals(currentUserUsername))
-                .map(userFriendshipEntity ->
-                        switch (userFriendshipEntity.getStatus()) {
-                            case PENDING -> FriendStatus.PENDING;
-                            case ACCEPTED -> FriendStatus.FRIEND;
-                            case REJECTED -> FriendStatus.REJECTED;
-                        })
-                .findFirst()
-                .orElse(FriendStatus.NOT_FRIEND);
+        FriendStatus friendStatus;
+
+        if (userEntity.getUsername().equals(currentUserUsername)) {
+            friendStatus = FriendStatus.OWN_ACCOUNT;
+        } else {
+            friendStatus = Stream.concat(userEntity.getSentFriendRequests().stream(),
+                            userEntity.getReceivedFriendRequests().stream())
+                    .filter(request -> request.getRequester().getUsername().equals(currentUserUsername) ||
+                            request.getAddressee().getUsername().equals(currentUserUsername))
+                    .map(userFriendshipEntity ->
+                            switch (userFriendshipEntity.getStatus()) {
+                                case PENDING -> FriendStatus.PENDING;
+                                case ACCEPTED -> FriendStatus.FRIEND;
+                                case REJECTED -> FriendStatus.REJECTED;
+                            })
+                    .findFirst()
+                    .orElse(FriendStatus.NOT_FRIEND);
+        }
 
         return new GetUserDetailsResponseDto(
                 userEntity.getUsername(),
@@ -56,6 +62,9 @@ public class ServiceUtils {
     public UpdateUserResponseDto toDto(UserProfileEntity userProfile) {
         return new UpdateUserResponseDto(
                 userProfile.getUser().getUsername(),
+                String.valueOf(userProfile.getBirthday()),
+                userProfile.getLocation(),
+                userProfile.getWebsite(),
                 userProfile.getProfilePicture(),
                 userProfile.getBio()
         );
