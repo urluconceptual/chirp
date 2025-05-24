@@ -3,12 +3,11 @@ package org.unibuc.chirp.application.rest;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.unibuc.chirp.domain.dto.conversation.create.CreateConversationRequestDto;
 import org.unibuc.chirp.domain.dto.conversation.create.CreateConversationResponseDto;
+import org.unibuc.chirp.domain.dto.conversation.get.GetConversationRequestDto;
+import org.unibuc.chirp.domain.dto.conversation.get.GetConversationResponseDto;
 import org.unibuc.chirp.domain.service.ConversationService;
 
 @RestController
@@ -24,6 +23,14 @@ public class ConversationController {
             @RequestBody CreateConversationRequestDto createConversationRequestDto) {
         return ResponseEntity.ok(
                 conversationService.createConversation(createConversationRequestDto)
+        );
+    }
+
+    @GetMapping("/{conversationId}")
+    public ResponseEntity<GetConversationResponseDto> getConversation(
+            @PathVariable Long conversationId, @RequestBody GetConversationRequestDto getConversationRequestDto) {
+        return ResponseEntity.ok(
+                conversationService.getConversation(conversationId, getConversationRequestDto)
         );
     }
 }

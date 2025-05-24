@@ -1,8 +1,10 @@
 package org.unibuc.chirp.impl.validator;
 
 import lombok.AllArgsConstructor;
+import lombok.NonNull;
 import org.springframework.stereotype.Component;
 import org.unibuc.chirp.domain.dto.conversation.create.CreateConversationRequestDto;
+import org.unibuc.chirp.domain.dto.conversation.get.GetConversationRequestDto;
 import org.unibuc.chirp.domain.exception.AppException;
 import org.unibuc.chirp.domain.exception.ErrorCode;
 import org.unibuc.chirp.domain.repository.ConversationRepository;
@@ -19,6 +21,12 @@ public class ConversationValidator {
             throw new AppException(ErrorCode.CHR0005);
         } else if (createConversationRequestDto.title().length() > MAX_TITLE_LENGTH) {
             throw new AppException(ErrorCode.CHR0006);
+        }
+    }
+
+    public void validate(@NonNull Long conversationId) {
+        if (!conversationRepository.existsById(conversationId)) {
+            throw new AppException(ErrorCode.CHR0007);
         }
     }
 }

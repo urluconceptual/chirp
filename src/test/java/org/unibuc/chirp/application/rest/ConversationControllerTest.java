@@ -1,10 +1,7 @@
 package org.unibuc.chirp.application.rest;
 
 import lombok.val;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -13,13 +10,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.unibuc.chirp.domain.dto.conversation.create.CreateConversationRequestDto;
+import org.unibuc.chirp.domain.dto.conversation.get.GetConversationRequestDto;
 import org.unibuc.chirp.domain.dto.user.create.CreateUserRequestDto;
 import org.unibuc.chirp.domain.entity.AppUser;
+import org.unibuc.chirp.domain.entity.Conversation;
+import org.unibuc.chirp.domain.entity.Message;
 import org.unibuc.chirp.domain.exception.AppException;
+import org.unibuc.chirp.domain.exception.ErrorCode;
 import org.unibuc.chirp.domain.repository.AppUserRepository;
 import org.unibuc.chirp.domain.repository.ConversationRepository;
+import org.unibuc.chirp.domain.repository.MessageRepository;
 import org.unibuc.chirp.impl.service.ConversationServiceImpl;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -37,6 +40,8 @@ class ConversationControllerTest {
     private ConversationRepository conversationRepository;
     @Autowired
     private AppUserRepository userRepository;
+    @Autowired
+    private MessageRepository messageRepository;
 
     private AppUser firstUser;
     private AppUser secondUser;
@@ -148,6 +153,107 @@ class ConversationControllerTest {
             assertThrows(AppException.class,
                     () -> conversationController.createConversation(request),
                     "Should throw AppException when user not found"
+            );
+        }
+    }
+
+    @Nested
+    @DisplayName("Get Conversation Tests")
+    class GetConversationTests {
+
+        private Conversation conversation;
+        private Message firstMessage;
+        private Message secondMessage;
+
+
+        @BeforeEach
+        void setUp() {
+            userController.createUser(createUserDto("firstUser"));
+            userController.createUser(createUserDto("secondUser"));
+
+            firstUser = userRepository.findByUsername("firstUser").orElseThrow();
+            secondUser = userRepository.findByUsername("secondUser").orElseThrow();
+
+
+            conversation = conversationRepository.save(
+                    Conversation.builder()
+                            .title("Test conversation")
+                            .participants(List.of(firstUser, secondUser))
+                            .build()
+            );
+
+            firstMessage = messageRepository.save(
+                    Message.builder()
+                            .content("Test message")
+                            .sender(firstUser)
+                            .conversation(conversation)
+                            .timestamp(LocalDateTime.of(2023, 10, 1, 12, 0))
+                            .build()
+            );
+
+            secondMessage = messageRepository.save(
+                    Message.builder()
+                            .content("Another test message")
+                            .sender(secondUser)
+                            .conversation(conversation)
+                            .timestamp(LocalDateTime.of(2023, 10, 1, 12, 2))
+                            .build()
+            );
+
+            conversation.setMessageList(List.of(firstMessage, secondMessage));
+            conversationRepository.save(conversation);
+        }
+
+        @Test
+        void shouldGetConversationWhenIdIsFine() {
+            val response = conversationController.getConversation(conversation.getId(), new GetConversationRequestDto(0, 20));
+
+            assertAll(
+                    () -> assertNotNull(response, "Response should not be null"),
+                    () -> assertNotNull(response.getBody(), "Response body should not be null"),
+                    () -> assertEquals(conversation.getId(), response.getBody().id(), "Conversation ID should match"),
+                    () -> assertEquals(conversation.getTitle(), response.getBody().title(), "Title should match"),
+                    () -> assertEquals(conversation.getMessageList().size(), response.getBody().messages().size(), "Messages size should match"),
+                    () -> assertEquals(List.of(firstUser.getUsername(), secondUser.getUsername()), response.getBody().participantList()),
+                    () -> assertEquals(conversation.getMessageList().reversed().get(0).getContent(), response.getBody().messages().get(0).content(),
+                            "First message content should match"),
+                    () -> assertEquals(conversation.getMessageList().reversed().get(1).getContent(), response.getBody().messages().get(1).content(),
+                            "Second message content should match")
+            );
+        }
+
+        @Test
+        void shouldThrowAppExceptionWhenConversationNotFound() {
+            AppException exception = assertThrows(AppException.class,
+                    () -> conversationController.getConversation(999L, new GetConversationRequestDto(0, 20)),
+                    "Should throw AppException when conversation not found"
+            );
+
+            assertAll(
+                    () -> assertEquals(ErrorCode.CHR0007.getMessage(), exception.getMessage(), "Error message should match")
+            );
+        }
+
+        @Test
+        void shouldPaginateMessagesCorrectly() {
+            val response = conversationController.getConversation(conversation.getId(), new GetConversationRequestDto(0, 1));
+
+            assertAll(
+                    () -> assertNotNull(response, "Response should not be null"),
+                    () -> assertNotNull(response.getBody(), "Response body should not be null"),
+                    () -> assertEquals(1, response.getBody().messages().size(), "Should return only one message"),
+                    () -> assertEquals(secondMessage.getContent(), response.getBody().messages().get(0).content(),
+                            "First message content should match")
+            );
+
+            val response2 = conversationController.getConversation(conversation.getId(), new GetConversationRequestDto(1, 1));
+
+            assertAll(
+                    () -> assertNotNull(response2, "Response should not be null"),
+                    () -> assertNotNull(response2.getBody(), "Response body should not be null"),
+                    () -> assertEquals(1, response2.getBody().messages().size(), "Should return only one message"),
+                    () -> assertEquals(firstMessage.getContent(), response2.getBody().messages().get(0).content(),
+                            "Second message content should match")
             );
         }
     }
