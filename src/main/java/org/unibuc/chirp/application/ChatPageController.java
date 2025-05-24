@@ -1,4 +1,4 @@
-package org.unibuc.chirp.application.web;
+package org.unibuc.chirp.application;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;

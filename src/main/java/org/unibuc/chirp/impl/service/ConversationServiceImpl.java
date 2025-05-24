@@ -12,9 +12,9 @@ import org.unibuc.chirp.domain.dto.conversation.create.CreateConversationRequest
 import org.unibuc.chirp.domain.dto.conversation.create.CreateConversationResponseDto;
 import org.unibuc.chirp.domain.dto.conversation.get.GetConversationRequestDto;
 import org.unibuc.chirp.domain.dto.conversation.get.GetConversationResponseDto;
-import org.unibuc.chirp.domain.entity.Conversation;
-import org.unibuc.chirp.domain.entity.Message;
-import org.unibuc.chirp.domain.repository.AppUserRepository;
+import org.unibuc.chirp.domain.entity.ConversationEntity;
+import org.unibuc.chirp.domain.entity.MessageEntity;
+import org.unibuc.chirp.domain.repository.UserRepository;
 import org.unibuc.chirp.domain.repository.ConversationRepository;
 import org.unibuc.chirp.domain.repository.MessageRepository;
 import org.unibuc.chirp.domain.service.ConversationService;
@@ -25,7 +25,7 @@ import org.unibuc.chirp.impl.validator.UserValidator;
 @Service
 @AllArgsConstructor
 public class ConversationServiceImpl implements ConversationService {
-    private AppUserRepository appUserRepository;
+    private UserRepository userRepository;
     private ConversationRepository conversationRepository;
     private MessageRepository messageRepository;
 
@@ -37,9 +37,9 @@ public class ConversationServiceImpl implements ConversationService {
         conversationValidator.validate(createConversationRequestDto);
         userValidator.validate(createConversationRequestDto.participantIdList());
 
-        val participantUserList = this.appUserRepository.findAllById(createConversationRequestDto.participantIdList());
+        val participantUserList = this.userRepository.findAllById(createConversationRequestDto.participantIdList());
 
-        val conversation = Conversation.builder()
+        val conversation = ConversationEntity.builder()
                 .title(createConversationRequestDto.title())
                 .participants(participantUserList)
                 .build();
@@ -69,7 +69,7 @@ public class ConversationServiceImpl implements ConversationService {
                 Sort.by(Sort.Direction.DESC, "timestamp")
         );
 
-        Page<Message> messagePage = messageRepository.findMessagesByConversationId(conversationId, pageable);
+        Page<MessageEntity> messagePage = messageRepository.findMessagesByConversationId(conversationId, pageable);
 
         return ServiceUtils.toDtoGetConversation(conversation, messagePage);
     }

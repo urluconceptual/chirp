@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
     <title>Chat App</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js" integrity="sha512-1QvjE7BtotQjkq8PxLeF6P46gEpBRXuskzIVgjFpekzFVF4yjRgrQvTG1MTOJ3yQgvTteKAcO7DSZI92+u/yZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -9,12 +9,12 @@
 <body>
 <h2>Welcome to Chirp! 💬</h2>
 
-<div id="chat-box" hx-get="/chat/messages" hx-trigger="load" hx-target="#chat-box" hx-swap="innerHTML">
+<div id="chat-box">
     <!-- Message history will load here -->
 </div>
 
 <form onsubmit="sendMessage(); return false;">
-    <input type="text" id="messageInput" placeholder="Type your message" />
+    <input type="text" id="messageInput" placeholder="Type your messageEntity" />
     <button type="submit">Send</button>
 </form>
 

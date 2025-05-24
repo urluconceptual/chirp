@@ -17,3 +17,10 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
         use_sql_comments: true
+
+  thymeleaf:
+    cache: false
+
+  devtools:
+    restart:
+      exclude: "resources/static/**"

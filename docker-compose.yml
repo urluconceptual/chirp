@@ -1,7 +1,6 @@
 version: '3.8'
 services:
   postgres:
-    # todo figure out why this shows something else
     image: postgres:15
     container_name: chirp-db
     environment:

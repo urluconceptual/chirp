@@ -6,13 +6,13 @@ import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
+@Entity(name = "conversations")
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Conversation {
+public class ConversationEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,9 +26,9 @@ public class Conversation {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     @Builder.Default
-    private List<AppUser> participants = new ArrayList<>();
+    private List<UserEntity> participants = new ArrayList<>();
 
     @OneToMany(mappedBy = "conversation", cascade = CascadeType.ALL)
     @Builder.Default
-    private List<Message> messageList = new ArrayList<>();
+    private List<MessageEntity> messageList = new ArrayList<>();
 }

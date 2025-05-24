@@ -1,4 +1,4 @@
-package org.unibuc.chirp.application.rest;
+package org.unibuc.chirp.application;
 
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;

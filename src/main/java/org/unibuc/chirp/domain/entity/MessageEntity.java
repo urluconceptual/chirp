@@ -5,13 +5,13 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-@Entity
+@Entity(name = "messages")
 @Getter
 @Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Message {
+public class MessageEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,9 +21,9 @@ public class Message {
 
     @ManyToOne
     @JoinColumn(name = "sender_id")
-    private AppUser sender;
+    private UserEntity sender;
 
     @ManyToOne
     @JoinColumn(name = "conversation_id")
-    private Conversation conversation;
+    private ConversationEntity conversation;
 }

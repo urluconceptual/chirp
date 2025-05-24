@@ -6,22 +6,33 @@ import jakarta.persistence.MapsId;
 import jakarta.persistence.OneToOne;
 import lombok.*;
 
-@Entity
+import java.time.LocalDate;
+
+@Entity(name = "user_profiles")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AppUserProfile {
+public class UserProfileEntity {
     @Id
     private Long id;
 
-    private String avatarUrl;
+    @Builder.Default
+    private String avatarUrl = "";
 
     @Builder.Default
     private String bio = "";
 
+    private LocalDate birthday;
+
+    @Builder.Default
+    private String location = "";
+
+    @Builder.Default
+    private String website = "";
+
     @OneToOne
     @MapsId
-    private AppUser appUser;
+    private UserEntity user;
 }

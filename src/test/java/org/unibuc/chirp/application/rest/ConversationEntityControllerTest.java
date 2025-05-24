@@ -9,17 +9,19 @@ import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.unibuc.chirp.application.ConversationController;
 import org.unibuc.chirp.domain.dto.conversation.create.CreateConversationRequestDto;
 import org.unibuc.chirp.domain.dto.conversation.get.GetConversationRequestDto;
 import org.unibuc.chirp.domain.dto.user.create.CreateUserRequestDto;
-import org.unibuc.chirp.domain.entity.AppUser;
-import org.unibuc.chirp.domain.entity.Conversation;
-import org.unibuc.chirp.domain.entity.Message;
+import org.unibuc.chirp.domain.entity.UserEntity;
+import org.unibuc.chirp.domain.entity.ConversationEntity;
+import org.unibuc.chirp.domain.entity.MessageEntity;
 import org.unibuc.chirp.domain.exception.AppException;
 import org.unibuc.chirp.domain.exception.ErrorCode;
-import org.unibuc.chirp.domain.repository.AppUserRepository;
+import org.unibuc.chirp.domain.repository.UserRepository;
 import org.unibuc.chirp.domain.repository.ConversationRepository;
 import org.unibuc.chirp.domain.repository.MessageRepository;
+import org.unibuc.chirp.domain.service.AuthService;
 import org.unibuc.chirp.impl.service.ConversationServiceImpl;
 
 import java.time.LocalDateTime;
@@ -31,20 +33,20 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @ActiveProfiles("test")
 @DisplayName("ConversationController Tests")
-class ConversationControllerTest {
+class ConversationEntityControllerTest {
     @Autowired
     private ConversationController conversationController;
     @Autowired
-    private UserController userController;
+    private AuthService authService;
     @Autowired
     private ConversationRepository conversationRepository;
     @Autowired
-    private AppUserRepository userRepository;
+    private UserRepository userRepository;
     @Autowired
     private MessageRepository messageRepository;
 
-    private AppUser firstUser;
-    private AppUser secondUser;
+    private UserEntity firstUser;
+    private UserEntity secondUser;
 
     @BeforeEach
     void setUp() {
@@ -66,12 +68,12 @@ class ConversationControllerTest {
     }
 
     private CreateUserRequestDto createUserDto(String username) {
-        return UserControllerTest.getCreateUserRequestDto(username);
+        return AccountControllerTest.getCreateUserRequestDto(username);
     }
 
     @Nested
     @DisplayName("Create Conversation Tests")
-    class CreateConversationTests {
+    class CreateConversationEntityTests {
 
         private static Stream<Arguments> invalidUserIdsCombinations() {
             return Stream.of(
@@ -82,8 +84,8 @@ class ConversationControllerTest {
 
         @BeforeEach
         void setUp() {
-            userController.createUser(createUserDto("firstUser"));
-            userController.createUser(createUserDto("secondUser"));
+            authService.registerUser(createUserDto("firstUser"));
+            authService.registerUser(createUserDto("secondUser"));
 
             firstUser = userRepository.findByUsername("firstUser").orElseThrow();
             secondUser = userRepository.findByUsername("secondUser").orElseThrow();
@@ -159,65 +161,68 @@ class ConversationControllerTest {
 
     @Nested
     @DisplayName("Get Conversation Tests")
-    class GetConversationTests {
+    class GetConversationEntityTests {
 
-        private Conversation conversation;
-        private Message firstMessage;
-        private Message secondMessage;
+        private ConversationEntity conversationEntity;
+        private MessageEntity firstMessageEntity;
+        private MessageEntity secondMessageEntity;
 
 
         @BeforeEach
         void setUp() {
-            userController.createUser(createUserDto("firstUser"));
-            userController.createUser(createUserDto("secondUser"));
+            authService.registerUser(createUserDto("firstUser"));
+            authService.registerUser(createUserDto("secondUser"));
 
             firstUser = userRepository.findByUsername("firstUser").orElseThrow();
             secondUser = userRepository.findByUsername("secondUser").orElseThrow();
 
 
-            conversation = conversationRepository.save(
-                    Conversation.builder()
+            conversationEntity = conversationRepository.save(
+                    ConversationEntity.builder()
                             .title("Test conversation")
                             .participants(List.of(firstUser, secondUser))
                             .build()
             );
 
-            firstMessage = messageRepository.save(
-                    Message.builder()
+            firstMessageEntity = messageRepository.save(
+                    MessageEntity.builder()
                             .content("Test message")
                             .sender(firstUser)
-                            .conversation(conversation)
+                            .conversation(conversationEntity)
                             .timestamp(LocalDateTime.of(2023, 10, 1, 12, 0))
                             .build()
             );
 
-            secondMessage = messageRepository.save(
-                    Message.builder()
+            secondMessageEntity = messageRepository.save(
+                    MessageEntity.builder()
                             .content("Another test message")
                             .sender(secondUser)
-                            .conversation(conversation)
+                            .conversation(conversationEntity)
                             .timestamp(LocalDateTime.of(2023, 10, 1, 12, 2))
                             .build()
             );
 
-            conversation.setMessageList(List.of(firstMessage, secondMessage));
-            conversationRepository.save(conversation);
+            conversationEntity.setMessageList(List.of(firstMessageEntity, secondMessageEntity));
+            conversationRepository.save(conversationEntity);
         }
 
         @Test
         void shouldGetConversationWhenIdIsFine() {
-            val response = conversationController.getConversation(conversation.getId(), new GetConversationRequestDto(0, 20));
+            val response = conversationController.getConversation(
+                    conversationEntity.getId(), new GetConversationRequestDto(0, 20));
 
             assertAll(
                     () -> assertNotNull(response, "Response should not be null"),
                     () -> assertNotNull(response.getBody(), "Response body should not be null"),
-                    () -> assertEquals(conversation.getId(), response.getBody().id(), "Conversation ID should match"),
-                    () -> assertEquals(conversation.getTitle(), response.getBody().title(), "Title should match"),
-                    () -> assertEquals(conversation.getMessageList().size(), response.getBody().messages().size(), "Messages size should match"),
+                    () -> assertEquals(conversationEntity.getId(), response.getBody().id(), "Conversation ID should match"),
+                    () -> assertEquals(conversationEntity.getTitle(), response.getBody().title(), "Title should match"),
+                    () -> assertEquals(conversationEntity.getMessageList().size(), response.getBody().messages().size(), "Messages size should match"),
                     () -> assertEquals(List.of(firstUser.getUsername(), secondUser.getUsername()), response.getBody().participantList()),
-                    () -> assertEquals(conversation.getMessageList().reversed().get(0).getContent(), response.getBody().messages().get(0).content(),
+                    () -> assertEquals(
+                            conversationEntity.getMessageList().reversed().get(0).getContent(), response.getBody().messages().get(0).content(),
                             "First message content should match"),
-                    () -> assertEquals(conversation.getMessageList().reversed().get(1).getContent(), response.getBody().messages().get(1).content(),
+                    () -> assertEquals(
+                            conversationEntity.getMessageList().reversed().get(1).getContent(), response.getBody().messages().get(1).content(),
                             "Second message content should match")
             );
         }
@@ -236,23 +241,25 @@ class ConversationControllerTest {
 
         @Test
         void shouldPaginateMessagesCorrectly() {
-            val response = conversationController.getConversation(conversation.getId(), new GetConversationRequestDto(0, 1));
+            val response = conversationController.getConversation(
+                    conversationEntity.getId(), new GetConversationRequestDto(0, 1));
 
             assertAll(
                     () -> assertNotNull(response, "Response should not be null"),
                     () -> assertNotNull(response.getBody(), "Response body should not be null"),
                     () -> assertEquals(1, response.getBody().messages().size(), "Should return only one message"),
-                    () -> assertEquals(secondMessage.getContent(), response.getBody().messages().get(0).content(),
+                    () -> assertEquals(secondMessageEntity.getContent(), response.getBody().messages().get(0).content(),
                             "First message content should match")
             );
 
-            val response2 = conversationController.getConversation(conversation.getId(), new GetConversationRequestDto(1, 1));
+            val response2 = conversationController.getConversation(
+                    conversationEntity.getId(), new GetConversationRequestDto(1, 1));
 
             assertAll(
                     () -> assertNotNull(response2, "Response should not be null"),
                     () -> assertNotNull(response2.getBody(), "Response body should not be null"),
                     () -> assertEquals(1, response2.getBody().messages().size(), "Should return only one message"),
-                    () -> assertEquals(firstMessage.getContent(), response2.getBody().messages().get(0).content(),
+                    () -> assertEquals(firstMessageEntity.getContent(), response2.getBody().messages().get(0).content(),
                             "Second message content should match")
             );
         }

@@ -9,49 +9,43 @@ import org.unibuc.chirp.domain.dto.message.get.GetMessageResponseDto;
 import org.unibuc.chirp.domain.dto.user.create.CreateUserResponseDto;
 import org.unibuc.chirp.domain.dto.user.get.GetUserDetailsResponseDto;
 import org.unibuc.chirp.domain.dto.user.update.UpdateUserResponseDto;
-import org.unibuc.chirp.domain.entity.AppUser;
-import org.unibuc.chirp.domain.entity.AppUserProfile;
-import org.unibuc.chirp.domain.entity.Conversation;
-import org.unibuc.chirp.domain.entity.Message;
+import org.unibuc.chirp.domain.entity.UserEntity;
+import org.unibuc.chirp.domain.entity.UserProfileEntity;
+import org.unibuc.chirp.domain.entity.ConversationEntity;
+import org.unibuc.chirp.domain.entity.MessageEntity;
 
 @Slf4j
 @UtilityClass
 public class ServiceUtils {
-    public CreateUserResponseDto toCreateUserResponseDto(AppUser appUser) {
-        return new CreateUserResponseDto(
-                appUser.getUsername()
-        );
-    }
-
-    public GetUserDetailsResponseDto toGetUserDetailsResponseDto(AppUser appUser) {
+    public GetUserDetailsResponseDto toGetUserDetailsResponseDto(UserEntity userEntity) {
         return new GetUserDetailsResponseDto(
-                appUser.getUsername(),
-                appUser.getAppUserProfile().getAvatarUrl(),
-                appUser.getAppUserProfile().getBio()
+                userEntity.getUsername(),
+                userEntity.getUserProfile().getAvatarUrl(),
+                userEntity.getUserProfile().getBio()
         );
     }
 
-    public UpdateUserResponseDto toDto(AppUserProfile userProfile) {
+    public UpdateUserResponseDto toDto(UserProfileEntity userProfile) {
         return new UpdateUserResponseDto(
-                userProfile.getAppUser().getUsername(),
+                userProfile.getUser().getUsername(),
                 userProfile.getAvatarUrl(),
                 userProfile.getBio()
         );
     }
 
-    public static CreateConversationResponseDto toDto(Conversation conversation) {
+    public static CreateConversationResponseDto toDto(ConversationEntity conversationEntity) {
         return new CreateConversationResponseDto(
-                conversation.getId(),
-                conversation.getTitle()
+                conversationEntity.getId(),
+                conversationEntity.getTitle()
         );
     }
 
-    public static GetConversationResponseDto toDtoGetConversation(Conversation conversation, Page<Message> messagePage) {
+    public static GetConversationResponseDto toDtoGetConversation(ConversationEntity conversationEntity, Page<MessageEntity> messagePage) {
         return new GetConversationResponseDto(
-                conversation.getId(),
-                conversation.getTitle(),
-                conversation.getParticipants().stream()
-                        .map(AppUser::getUsername)
+                conversationEntity.getId(),
+                conversationEntity.getTitle(),
+                conversationEntity.getParticipants().stream()
+                        .map(UserEntity::getUsername)
                         .toList(),
                 messagePage.getContent().stream()
                         .map(ServiceUtils::toDto)
@@ -59,12 +53,12 @@ public class ServiceUtils {
         );
     }
 
-    public static GetMessageResponseDto toDto(Message message) {
+    public static GetMessageResponseDto toDto(MessageEntity messageEntity) {
         return new GetMessageResponseDto(
-                message.getId(),
-                message.getContent(),
-                message.getSender().getUsername(),
-                message.getTimestamp().toString()
+                messageEntity.getId(),
+                messageEntity.getContent(),
+                messageEntity.getSender().getUsername(),
+                messageEntity.getTimestamp().toString()
         );
     }
 }

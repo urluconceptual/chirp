@@ -6,17 +6,17 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Entity
+@Entity(name = "user_statuses")
 @Getter
 @Setter
-public class UserStatus {
+public class UserStatusEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @OneToOne
     @JoinColumn(name = "user_id")
-    private AppUser user;
+    private UserEntity user;
 
     @Enumerated(EnumType.STRING)
     private StatusType status;
