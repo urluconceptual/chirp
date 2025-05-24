@@ -11,7 +11,8 @@ public enum ErrorCode {
     CHR0004("User profile not found"),
     CHR0005("Conversation title cannot be empty"),
     CHR0006("Conversation title too long"),
-    CHR0007("Conversation ID not found"),;
+    CHR0007("Conversation ID not found"),
+    CHR0008("Invalid username or password"),;
 
     private final String message;
 

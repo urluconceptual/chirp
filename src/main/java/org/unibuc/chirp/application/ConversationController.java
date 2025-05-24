@@ -1,4 +1,4 @@
-package org.unibuc.chirp.application.rest;
+package org.unibuc.chirp.application;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

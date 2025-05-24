@@ -6,21 +6,21 @@ import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Entity
+@Entity(name = "user_friendships")
 @Getter
 @Setter
-public class UserFriend {
+public class UserFriendshipEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "requester_id")
-    private AppUser requester;
+    private UserEntity requester;
 
     @ManyToOne
     @JoinColumn(name = "addressee_id")
-    private AppUser addressee;
+    private UserEntity addressee;
 
     @Enumerated(EnumType.STRING)
     private FriendshipStatus status;

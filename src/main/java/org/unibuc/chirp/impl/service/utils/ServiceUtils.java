@@ -3,55 +3,78 @@ package org.unibuc.chirp.impl.service.utils;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.unibuc.chirp.domain.dto.conversation.create.CreateConversationResponseDto;
 import org.unibuc.chirp.domain.dto.conversation.get.GetConversationResponseDto;
 import org.unibuc.chirp.domain.dto.message.get.GetMessageResponseDto;
-import org.unibuc.chirp.domain.dto.user.create.CreateUserResponseDto;
+import org.unibuc.chirp.domain.dto.user.get.FriendStatus;
 import org.unibuc.chirp.domain.dto.user.get.GetUserDetailsResponseDto;
 import org.unibuc.chirp.domain.dto.user.update.UpdateUserResponseDto;
-import org.unibuc.chirp.domain.entity.AppUser;
-import org.unibuc.chirp.domain.entity.AppUserProfile;
-import org.unibuc.chirp.domain.entity.Conversation;
-import org.unibuc.chirp.domain.entity.Message;
+import org.unibuc.chirp.domain.entity.*;
+
+import java.time.format.DateTimeFormatter;
+import java.util.stream.Stream;
 
 @Slf4j
 @UtilityClass
 public class ServiceUtils {
-    public CreateUserResponseDto toCreateUserResponseDto(AppUser appUser) {
-        return new CreateUserResponseDto(
-                appUser.getUsername()
-        );
-    }
+    public GetUserDetailsResponseDto toGetUserDetailsResponseDto(UserEntity userEntity) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUserUsername = authentication.getName();
 
-    public GetUserDetailsResponseDto toGetUserDetailsResponseDto(AppUser appUser) {
+        Integer numberOfFriends = Stream.concat(userEntity.getSentFriendRequests().stream(),
+                        userEntity.getReceivedFriendRequests().stream())
+                .filter(request -> request.getStatus().equals(
+                        UserFriendshipEntity.FriendshipStatus.ACCEPTED)).toList().size();
+
+        FriendStatus friendStatus = Stream.concat(userEntity.getSentFriendRequests().stream(),
+                        userEntity.getReceivedFriendRequests().stream())
+                .filter(request -> request.getRequester().getUsername().equals(currentUserUsername) ||
+                        request.getAddressee().getUsername().equals(currentUserUsername))
+                .map(userFriendshipEntity ->
+                        switch (userFriendshipEntity.getStatus()) {
+                            case PENDING -> FriendStatus.PENDING;
+                            case ACCEPTED -> FriendStatus.FRIEND;
+                            case REJECTED -> FriendStatus.REJECTED;
+                        })
+                .findFirst()
+                .orElse(FriendStatus.NOT_FRIEND);
+
         return new GetUserDetailsResponseDto(
-                appUser.getUsername(),
-                appUser.getAppUserProfile().getAvatarUrl(),
-                appUser.getAppUserProfile().getBio()
-        );
+                userEntity.getUsername(),
+                userEntity.getUserProfile().getProfilePicture(),
+                userEntity.getUserProfile().getBio(),
+                userEntity.getUserProfile().getBirthday() != null ?
+                        userEntity.getUserProfile().getBirthday().format(DateTimeFormatter.ISO_LOCAL_DATE) : null,
+                userEntity.getUserProfile().getLocation(),
+                userEntity.getUserProfile().getWebsite(),
+                numberOfFriends,
+                friendStatus.toString());
     }
 
-    public UpdateUserResponseDto toDto(AppUserProfile userProfile) {
+    public UpdateUserResponseDto toDto(UserProfileEntity userProfile) {
         return new UpdateUserResponseDto(
-                userProfile.getAppUser().getUsername(),
-                userProfile.getAvatarUrl(),
+                userProfile.getUser().getUsername(),
+                userProfile.getProfilePicture(),
                 userProfile.getBio()
         );
     }
 
-    public static CreateConversationResponseDto toDto(Conversation conversation) {
+    public static CreateConversationResponseDto toDto(ConversationEntity conversationEntity) {
         return new CreateConversationResponseDto(
-                conversation.getId(),
-                conversation.getTitle()
+                conversationEntity.getId(),
+                conversationEntity.getTitle()
         );
     }
 
-    public static GetConversationResponseDto toDtoGetConversation(Conversation conversation, Page<Message> messagePage) {
+    public static GetConversationResponseDto toDtoGetConversation(ConversationEntity conversationEntity,
+                                                                  Page<MessageEntity> messagePage) {
         return new GetConversationResponseDto(
-                conversation.getId(),
-                conversation.getTitle(),
-                conversation.getParticipants().stream()
-                        .map(AppUser::getUsername)
+                conversationEntity.getId(),
+                conversationEntity.getTitle(),
+                conversationEntity.getParticipants().stream()
+                        .map(UserEntity::getUsername)
                         .toList(),
                 messagePage.getContent().stream()
                         .map(ServiceUtils::toDto)
@@ -59,12 +82,12 @@ public class ServiceUtils {
         );
     }
 
-    public static GetMessageResponseDto toDto(Message message) {
+    public static GetMessageResponseDto toDto(MessageEntity messageEntity) {
         return new GetMessageResponseDto(
-                message.getId(),
-                message.getContent(),
-                message.getSender().getUsername(),
-                message.getTimestamp().toString()
+                messageEntity.getId(),
+                messageEntity.getContent(),
+                messageEntity.getSender().getUsername(),
+                messageEntity.getTimestamp().toString()
         );
     }
 }

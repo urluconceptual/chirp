@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>My Account - Chirp</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background-color: #f8f9fa;
+            padding: 0 !important;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 1rem;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .sidebar a:hover {
+            background-color: #e2e6ea;
+        }
+
+        .sidebar a.active {
+            background-color: #0d6efd;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 sidebar">
+            <h4 class="p-3">Chirp</h4>
+            <a th:href="@{/chat}">Chats</a>
+            <a th:href="@{/friends}">My Friends</a>
+            <a th:href="@{/account/explore}">Explore</a>
+            <a class="active" th:href="@{/account/my-account}">My Account</a>
+        </div>
+
+        <div class="col-md-10 mt-3">
+            <h2>My Account</h2>
+            <div class="card mt-4">
+                <div class="card-body">
+                    <div class="mb-3 text-center">
+                        <img th:src="${user.profilePicture != null} ? ${'data:image/png;base64,' + user.profilePicture} : '/images/default-profile.jpg'"
+                             alt="Profile Picture"
+                             class="rounded-circle"
+                             style="width: 120px; height: 120px; object-fit: cover;">
+
+                        <h4 class="mt-2" th:text="${user.username}">Username</h4>
+
+                        <p class="text-muted" th:text="'Friends: ' + ${user.numberOfFriends}">Friends: 0</p>
+
+                        <a th:href="@{/account/my-account/edit}" class="btn btn-primary mt-3">Edit My Profile</a>
+                        <a th:href="@{/account/my-account/edit}" class="btn btn-secondary mt-3">Change Username or
+                            Password</a>
+                    </div>
+
+                    <p th:if="${user.bio != null && user.bio.length() != 0}"><strong>Bio:</strong>
+                        <span th:text="${user.bio}"></span>
+                    </p>
+
+                    <p th:if="${user.birthday != null && user.birthday.length() != 0}"><strong>Birthday:</strong>
+                        <span th:text="${user.birthday}"></span>
+                    </p>
+
+                    <p th:if="${user.location != null && user.location.length() != 0}"><strong>Location:</strong> <span
+                            th:text="${user.location}"></span></p>
+                    <p th:if="${user.website != null && user.website.length() != 0}"><strong>Website:</strong> <a
+                            th:href="${user.website}" th:text="${user.website}" target="_blank"></a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
