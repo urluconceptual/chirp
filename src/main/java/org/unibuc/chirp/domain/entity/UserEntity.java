@@ -37,7 +37,7 @@ public class UserEntity {
     @Builder.Default
     private List<ConversationEntity> conversationList = new ArrayList<>();
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user")
     private UserProfileEntity userProfile;
 
     @OneToMany(mappedBy = "requester")

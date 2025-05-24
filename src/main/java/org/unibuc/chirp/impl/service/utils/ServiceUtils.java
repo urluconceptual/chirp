@@ -39,7 +39,7 @@ public class ServiceUtils {
                             case REJECTED -> FriendStatus.REJECTED;
                         })
                 .findFirst()
-                .orElse(FriendStatus.NOT_FRIEND);
+                .orElse(userEntity.getUsername().equals(currentUserUsername)? FriendStatus.OWN_ACCOUNT : FriendStatus.NOT_FRIEND);
 
         return new GetUserDetailsResponseDto(
                 userEntity.getUsername(),
