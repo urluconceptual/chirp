@@ -56,6 +56,9 @@ public class ServiceUtils {
     public UpdateUserResponseDto toDto(UserProfileEntity userProfile) {
         return new UpdateUserResponseDto(
                 userProfile.getUser().getUsername(),
+                String.valueOf(userProfile.getBirthday()),
+                userProfile.getLocation(),
+                userProfile.getWebsite(),
                 userProfile.getProfilePicture(),
                 userProfile.getBio()
         );

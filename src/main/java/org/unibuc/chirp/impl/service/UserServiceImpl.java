@@ -1,6 +1,7 @@
 package org.unibuc.chirp.impl.service;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.val;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +23,7 @@ import java.util.Base64;
 
 @Service
 @AllArgsConstructor
+@Getter
 public class UserServiceImpl implements UserService {
 
     private UserRepository userRepository;
