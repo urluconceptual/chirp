@@ -5,9 +5,9 @@ import lombok.Getter;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.unibuc.chirp.domain.dto.conversation.create.CreateConversationRequestDto;
-import org.unibuc.chirp.domain.dto.conversation.create.CreateConversationResponseDto;
+import org.unibuc.chirp.domain.dto.conversation.create.ConversationResponseDto;
 import org.unibuc.chirp.domain.dto.conversation.get.GetConversationRequestDto;
-import org.unibuc.chirp.domain.dto.conversation.get.GetConversationResponseDto;
+import org.unibuc.chirp.domain.dto.conversation.get.ConversationDetailsResponseDto;
 import org.unibuc.chirp.domain.service.ConversationService;
 
 @RestController
@@ -19,7 +19,7 @@ public class ConversationController {
 
 
     @PostMapping("/new")
-    public ResponseEntity<CreateConversationResponseDto> createConversation(
+    public ResponseEntity<ConversationResponseDto> createConversation(
             @RequestBody CreateConversationRequestDto createConversationRequestDto) {
         return ResponseEntity.ok(
                 conversationService.createConversation(createConversationRequestDto)
@@ -27,7 +27,7 @@ public class ConversationController {
     }
 
     @GetMapping("/{conversationId}")
-    public ResponseEntity<GetConversationResponseDto> getConversation(
+    public ResponseEntity<ConversationDetailsResponseDto> getConversation(
             @PathVariable Long conversationId, @RequestBody GetConversationRequestDto getConversationRequestDto) {
         return ResponseEntity.ok(
                 conversationService.getConversation(conversationId, getConversationRequestDto)

@@ -4,7 +4,7 @@ import org.unibuc.chirp.domain.dto.message.get.GetMessageResponseDto;
 
 import java.util.List;
 
-public record GetConversationResponseDto(
+public record ConversationDetailsResponseDto(
         Long id,
         String title,
         List<String> participantList,

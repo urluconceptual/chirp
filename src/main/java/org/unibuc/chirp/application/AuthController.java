@@ -37,7 +37,7 @@ public class AuthController {
         }
         try {
             authService.loginUser(loginRequestDto, request);
-            return "redirect:/account/my-account";
+            return "redirect:/chat";
         } catch (AuthenticationException ex) {
             model.addAttribute("error", "Invalid username or password");
             return "login";

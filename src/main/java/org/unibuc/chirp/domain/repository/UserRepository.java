@@ -7,10 +7,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.unibuc.chirp.domain.entity.UserEntity;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
     Optional<UserEntity> findByUsername(String username);
+
+    List<UserEntity> findAllByUsernameIn(List<String> username);
 
     @Query("SELECT u FROM users u WHERE 'ADMIN' NOT IN (SELECT r.name FROM u.roles r)")
     Page<UserEntity> findAllNonAdminUsers(Pageable pageable);
