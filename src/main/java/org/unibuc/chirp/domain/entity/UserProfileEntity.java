@@ -1,9 +1,6 @@
 package org.unibuc.chirp.domain.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.MapsId;
-import jakarta.persistence.OneToOne;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
@@ -17,20 +14,12 @@ import java.time.LocalDate;
 public class UserProfileEntity {
     @Id
     private Long id;
-
-    @Builder.Default
-    private String avatarUrl = "";
-
-    @Builder.Default
-    private String bio = "";
-
+    @Column(length = 100000)
+    private String profilePicture;
+    private String bio;
     private LocalDate birthday;
-
-    @Builder.Default
-    private String location = "";
-
-    @Builder.Default
-    private String website = "";
+    private String location;
+    private String website;
 
     @OneToOne
     @MapsId

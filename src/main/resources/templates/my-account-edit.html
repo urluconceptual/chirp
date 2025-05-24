@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Edit Account - Chirp</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background-color: #f8f9fa;
+            padding: 0 !important;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 1rem;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .sidebar a:hover {
+            background-color: #e2e6ea;
+        }
+
+        .sidebar a.active {
+            background-color: #0d6efd;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 sidebar">
+            <h4 class="p-3">Chirp</h4>
+            <a th:href="@{/chat}">Chats</a>
+            <a th:href="@{/friends}">My Friends</a>
+            <a th:href="@{/account/explore}">Explore</a>
+            <a class="active" th:href="@{/account/my-account}">My Account</a>
+        </div>
+        <div class="col-md-10 mt-3">
+            <h2>My Account</h2>
+            <div class="card mt-4">
+                <div class="card-body">
+
+                    <form th:action="@{/account/my-account/edit}" th:object="${user}" method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label for="avatarFile" class="form-label">Profile Picture</label>
+                            <input type="file" class="form-control" id="avatarFile" name="avatarFile" accept="image/*"/>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="bio" class="form-label">Bio</label>
+                            <textarea class="form-control"
+                                      th:field="*{bio}"
+                                      th:classappend="${#fields.hasErrors('bio')} ? 'is-invalid' : ''"
+                                      id="bio"
+                                      rows="3"></textarea>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('bio')}" th:errors="*{bio}">Bio error</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="birthday" class="form-label">Birthday</label>
+                            <input type="date"
+                                   class="form-control"
+                                   th:field="*{birthday}"
+                                   th:classappend="${#fields.hasErrors('birthday')} ? 'is-invalid' : ''"
+                                   id="birthday"/>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('birthday')}" th:errors="*{birthday}">Birthday error</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="location" class="form-label">Location</label>
+                            <input type="text"
+                                   class="form-control"
+                                   th:field="*{location}"
+                                   th:classappend="${#fields.hasErrors('location')} ? 'is-invalid' : ''"
+                                   id="location"/>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('location')}" th:errors="*{location}">Location error</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="website" class="form-label">Website</label>
+                            <input type="url"
+                                   class="form-control"
+                                   th:field="*{website}"
+                                   th:classappend="${#fields.hasErrors('website')} ? 'is-invalid' : ''"
+                                   id="website"/>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('website')}" th:errors="*{website}">Website error</div>
+                        </div>
+
+
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                        <a th:href="@{/account/my-account}" class="btn btn-secondary ms-2">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

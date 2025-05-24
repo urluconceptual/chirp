@@ -42,10 +42,4 @@ public class UserValidator {
             }
         }
     }
-
-    public void validate(UpdateUserRequestDto updateUserRequestDto) {
-        if (updateUserRequestDto.updatedBio() == null) {
-            throw new AppException(ErrorCode.CHR0003);
-        }
-    }
 }
