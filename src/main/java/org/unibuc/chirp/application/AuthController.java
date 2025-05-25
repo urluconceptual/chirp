@@ -3,6 +3,7 @@ package org.unibuc.chirp.application;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -37,7 +38,7 @@ public class AuthController {
         }
         try {
             authService.loginUser(loginRequestDto, request);
-            return "redirect:/account/my-account";
+            return "redirect:/chat";
         } catch (AuthenticationException ex) {
             model.addAttribute("error", "Invalid username or password");
             return "login";
@@ -67,5 +68,17 @@ public class AuthController {
             model.addAttribute("createUserRequestDto", createUserRequestDto);
             return "register";
         }
+    }
+
+    @PostMapping("/logout")
+    public String logout(HttpServletRequest request) {
+        authService.logoutUser(request);
+        return "redirect:/auth/login";
+    }
+
+    @PostMapping("/logout-beacon")
+    public ResponseEntity<Void> logoutViaBeacon(HttpServletRequest request) {
+        authService.logoutUser(request);
+        return ResponseEntity.ok().build();
     }
 }

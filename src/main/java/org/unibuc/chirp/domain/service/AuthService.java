@@ -7,4 +7,5 @@ import org.unibuc.chirp.domain.dto.user.login.LoginRequestDto;
 public interface AuthService {
     void registerUser(CreateUserRequestDto createUserRequestDto);
     void loginUser(LoginRequestDto loginRequestDto, HttpServletRequest request);
+    void logoutUser(HttpServletRequest request);
 }

@@ -15,19 +15,16 @@ public class UserStatusEntity {
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", unique = true, nullable = false)
     private UserEntity user;
 
     @Enumerated(EnumType.STRING)
     private StatusType status;
 
-    private LocalDateTime lastSeen;
-    private String customStatus;
+    private LocalDateTime lastUpdated;
 
     public enum StatusType {
         ONLINE,
         OFFLINE,
-        BUSY,
-        AWAY
     }
 }

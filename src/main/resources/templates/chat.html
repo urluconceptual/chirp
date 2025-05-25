@@ -1,49 +1,128 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-    <title>Chat App</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.6.1/sockjs.min.js" integrity="sha512-1QvjE7BtotQjkq8PxLeF6P46gEpBRXuskzIVgjFpekzFVF4yjRgrQvTG1MTOJ3yQgvTteKAcO7DSZI92+u/yZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@stomp/stompjs@7.1.1/bundles/stomp.umd.min.js"></script>
-    <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <title>Chats - Chirp</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background-color: #f8f9fa;
+            padding: 0 !important;
+        }
+
+        .sidebar a {
+            display: block;
+            padding: 1rem;
+            color: #333;
+            text-decoration: none;
+        }
+
+        .sidebar a:hover {
+            background-color: #e2e6ea;
+        }
+
+        .sidebar a.active {
+            background-color: #0d6efd;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-<h2>Welcome to Chirp! 💬</h2>
 
-<div id="chat-box">
-    <!-- Message history will load here -->
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-2 sidebar">
+            <h4 class="p-3">Chirp</h4>
+            <a class="active" th:href="@{/chat}">Chats</a>
+            <a th:href="@{/friend/all}">My Friends</a>
+            <a th:href="@{/account/explore}">Explore</a>
+            <a th:href="@{/account/my-account}">My Account</a>
+        </div>
+        <div class="col-md-3 border-end" style="overflow-y: auto;">
+            <div class="d-flex justify-content-between align-items-center my-3">
+                <h4 class="mb-0">Your Chats</h4>
+                <a th:href="@{/chat/new}" class="btn btn-primary">New Chat</a>
+            </div>
+            <ul class="list-group" th:if="${chats != null and !#lists.isEmpty(chats)}">
+                <li class="list-group-item list-group-item-action"
+                    th:each="cht : ${chats}"
+                    th:classappend="${chat != null && cht.id == chat.id} ? 'list-group-item-success'"
+                >
+                    <a th:text="${cht.title}"
+                       th:href="@{/chat/messages/{id}(id=${cht.id})}"
+                       class="text-decoration-none">
+                        Chat participants
+                    </a>
+                </li>
+            </ul>
+
+            <p class="text-muted" th:if="${chats == null or #lists.isEmpty(chats)}">
+                You have no chats yet. Click <b>New Chat</b> to start one!
+            </p>
+        </div>
+
+        <div class="col-md-7 d-flex flex-column justify-content-between" style="overflow-y: auto;"
+             th:if="${chat != null}">
+            <h4 class="mt-4">Chat messages</h4>
+            <div class="card h-100 d-flex flex-column">
+                <div id="messages" th:attr="data-chatid=${chat.id}" class="card-body overflow-auto flex-grow-1"
+                     style="height: 400px;">
+                    <div th:each="msg : ${chat.messages}" class="mb-3">
+                        <div>
+                            <strong th:text="${msg.senderUsername}"></strong>:
+                            <span th:text="${msg.content}"></span>
+                        </div>
+                        <small class="text-muted" th:text="${msg.timestamp}"></small>
+                    </div>
+
+                    <p class="text-muted" th:if="${chat.messages == null or #lists.isEmpty(chat.messages)}">
+                        You have no messages in this chat yet.
+                    </p>
+                </div>
+
+                <form th:action="@{/chat/send/{id}(id=${chat.id})}" method="post" class="card-footer d-flex mt-auto">
+                    <input name="message" class="form-control me-2" placeholder="Type your message..."
+                           autocomplete="off"/>
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
-
-<form onsubmit="sendMessage(); return false;">
-    <input type="text" id="messageInput" placeholder="Type your messageEntity" />
-    <button type="submit">Send</button>
-</form>
-
 <script>
-    let stompClient = null;
+    window.onload = function () {
+        const messagesDiv = document.getElementById("messages");
+        const chatId = messagesDiv.getAttribute('data-chatid');
+        let currentPage = 0;
+        const pageSize = 15;
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
 
-    function connect() {
-        let socket = new SockJS('/ws');
-        stompClient = Stomp.over(socket);
-        stompClient.connect({}, function () {
-            stompClient.subscribe('/topic/public', function (messageOutput) {
-                let msg = JSON.parse(messageOutput.body);
-                const msgElement = document.createElement('div');
-                msgElement.innerText = msg.sender + ": " + msg.content;
-                document.getElementById("chat-box").appendChild(msgElement);
-            });
-        });
-    }
+        const onScroll = async () => {
+            if (messagesDiv.scrollTop < 50) {
+                currentPage++;
+                const response = await fetch(`/chat/messages/${chatId}/page?page=${currentPage}&size=${pageSize}`);
+                if (!response.ok) return;
 
-    function sendMessage() {
-        const content = document.getElementById('messageInput').value;
-        stompClient.send("/app/chat.sendMessage", {}, JSON.stringify({
-            sender: "You",
-            content: content
-        }));
-        document.getElementById('messageInput').value = '';
-    }
+                const data = await response.json();
+                for (const msg of data.messages.reverse()) {
+                    const msgDiv = document.createElement('div');
+                    msgDiv.classList.add('mb-3');
+                    msgDiv.innerHTML = `<div><strong>${msg.senderUsername}</strong>: <span>${msg.content}</span></div><small class="text-muted">${msg.timestamp}</small>`;
+                    messagesDiv.prepend(msgDiv);
+                }
 
-    connect();
+                if (data.hasMoreMessages) {
+                    messagesDiv.scrollTop = 50;
+                } else {
+                    messagesDiv.removeEventListener('scroll', onScroll);
+                }
+            }
+        };
+
+        messagesDiv.addEventListener('scroll', onScroll);
+    };
 </script>
 </body>
 </html>

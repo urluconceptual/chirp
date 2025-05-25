@@ -104,9 +104,9 @@
 //            assertAll(
 //                    () -> assertNotNull(response, "Response should not be null"),
 //                    () -> assertNotNull(response.getBody(), "Response body should not be null"),
-//                    () -> assertNotNull(response.getBody().conversationId(), "Conversation ID should not be null"),
+//                    () -> assertNotNull(response.getBody().id(), "Conversation ID should not be null"),
 //                    () -> assertNotNull(
-//                            conversationRepository.findById(response.getBody().conversationId()).orElseThrow(),
+//                            conversationRepository.findById(response.getBody().id()).orElseThrow(),
 //                            "Conversation should be present in the database"
 //                    ),
 //                    () -> assertEquals("Test conversation", response.getBody().title(),

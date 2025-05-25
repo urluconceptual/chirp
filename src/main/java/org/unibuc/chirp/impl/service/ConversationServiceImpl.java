@@ -9,18 +9,20 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.unibuc.chirp.domain.dto.conversation.create.CreateConversationRequestDto;
-import org.unibuc.chirp.domain.dto.conversation.create.CreateConversationResponseDto;
+import org.unibuc.chirp.domain.dto.conversation.create.ConversationResponseDto;
 import org.unibuc.chirp.domain.dto.conversation.get.GetConversationRequestDto;
-import org.unibuc.chirp.domain.dto.conversation.get.GetConversationResponseDto;
+import org.unibuc.chirp.domain.dto.conversation.get.ConversationDetailsResponseDto;
 import org.unibuc.chirp.domain.entity.ConversationEntity;
 import org.unibuc.chirp.domain.entity.MessageEntity;
-import org.unibuc.chirp.domain.repository.UserRepository;
 import org.unibuc.chirp.domain.repository.ConversationRepository;
 import org.unibuc.chirp.domain.repository.MessageRepository;
+import org.unibuc.chirp.domain.repository.UserRepository;
 import org.unibuc.chirp.domain.service.ConversationService;
 import org.unibuc.chirp.impl.service.utils.ServiceUtils;
 import org.unibuc.chirp.impl.validator.ConversationValidator;
 import org.unibuc.chirp.impl.validator.UserValidator;
+
+import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -33,11 +35,12 @@ public class ConversationServiceImpl implements ConversationService {
     private UserValidator userValidator;
 
     @Override
-    public CreateConversationResponseDto createConversation(CreateConversationRequestDto createConversationRequestDto) {
+    public ConversationResponseDto createConversation(CreateConversationRequestDto createConversationRequestDto) {
         conversationValidator.validate(createConversationRequestDto);
-        userValidator.validate(createConversationRequestDto.participantIdList());
+        userValidator.validate(createConversationRequestDto.participantList());
 
-        val participantUserList = this.userRepository.findAllById(createConversationRequestDto.participantIdList());
+        val participantUserList =
+                this.userRepository.findAllByUsernameIn(createConversationRequestDto.participantList());
 
         val conversation = ConversationEntity.builder()
                 .title(createConversationRequestDto.title())
@@ -47,30 +50,31 @@ public class ConversationServiceImpl implements ConversationService {
         return ServiceUtils.toDto(this.conversationRepository.save(conversation));
     }
 
-    /**
-     * Retrieves a conversation by its ID and returns the conversation details along with the messages in it.
-     * The messages are paginated based on the provided offset and limit, sorted by timestamp in descending order,
-     * thus showing the most recent messages first.
-     *
-     * @param conversationId            the ID of the conversation to retrieve
-     * @param getConversationRequestDto the request DTO containing pagination information
-     */
     @Override
     @Transactional
-    public GetConversationResponseDto getConversation(Long conversationId, GetConversationRequestDto getConversationRequestDto) {
+    public ConversationDetailsResponseDto getConversation(Long conversationId,
+                                                          GetConversationRequestDto getConversationRequestDto) {
         conversationValidator.validate(conversationId);
-
-        @SuppressWarnings("OptionalGetWithoutIsPresent")
         val conversation = this.conversationRepository.findById(conversationId).get();
 
         Pageable pageable = PageRequest.of(
-                getConversationRequestDto.offset(),
-                getConversationRequestDto.limit(),
+                getConversationRequestDto.page(),
+                getConversationRequestDto.size(),
                 Sort.by(Sort.Direction.DESC, "timestamp")
         );
 
         Page<MessageEntity> messagePage = messageRepository.findMessagesByConversationId(conversationId, pageable);
 
         return ServiceUtils.toDtoGetConversation(conversation, messagePage);
+    }
+
+    @Override
+    @Transactional
+    public List<ConversationResponseDto> getAllConversations(String username) {
+        userValidator.validate(username);
+
+        List<ConversationEntity> conversations = this.conversationRepository.findByParticipantsUsername(username);
+
+        return conversations.stream().map(ServiceUtils::toDto).toList();
     }
 }

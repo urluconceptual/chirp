@@ -55,9 +55,12 @@
 
                         <p class="text-muted" th:text="'Friends: ' + ${user.numberOfFriends}">Friends: 0</p>
 
-                        <a th:href="@{/account/my-account/edit}" class="btn btn-primary mt-3">Edit My Profile</a>
-                        <a th:href="@{/account/my-account/edit}" class="btn btn-secondary mt-3">Change Username or
-                            Password</a>
+                        <div class="d-flex gap-2 mt-2">
+                            <a th:href="@{/account/my-account/edit}" class="btn btn-primary">Edit My Profile</a>
+                            <form th:action="@{/auth/logout}" method="post">
+                                <button class="btn btn-danger">Log Out</button>
+                            </form>
+                        </div>
                     </div>
 
                     <p th:if="${user.bio != null && user.bio.length() != 0}"><strong>Bio:</strong>
@@ -77,6 +80,5 @@
         </div>
     </div>
 </div>
-
 </body>
 </html>

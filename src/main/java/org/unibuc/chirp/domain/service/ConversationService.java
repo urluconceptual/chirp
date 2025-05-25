@@ -1,12 +1,16 @@
 package org.unibuc.chirp.domain.service;
 
 import org.unibuc.chirp.domain.dto.conversation.create.CreateConversationRequestDto;
-import org.unibuc.chirp.domain.dto.conversation.create.CreateConversationResponseDto;
+import org.unibuc.chirp.domain.dto.conversation.create.ConversationResponseDto;
 import org.unibuc.chirp.domain.dto.conversation.get.GetConversationRequestDto;
-import org.unibuc.chirp.domain.dto.conversation.get.GetConversationResponseDto;
+import org.unibuc.chirp.domain.dto.conversation.get.ConversationDetailsResponseDto;
+
+import java.util.List;
 
 public interface ConversationService {
-    CreateConversationResponseDto createConversation(CreateConversationRequestDto createConversationRequestDto);
+    ConversationResponseDto createConversation(CreateConversationRequestDto createConversationRequestDto);
 
-    GetConversationResponseDto getConversation(Long conversationId, GetConversationRequestDto getConversationRequestDto);
+    ConversationDetailsResponseDto getConversation(Long conversationId, GetConversationRequestDto getConversationRequestDto);
+
+    List<ConversationResponseDto> getAllConversations(String username);
 }

@@ -2,7 +2,6 @@ package org.unibuc.chirp.domain.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.Fetch;
 
 import java.util.*;
 
@@ -40,6 +39,9 @@ public class UserEntity {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private UserProfileEntity userProfile;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private UserStatusEntity status;
 
     @OneToMany(mappedBy = "requester", fetch = FetchType.EAGER)
     @Builder.Default

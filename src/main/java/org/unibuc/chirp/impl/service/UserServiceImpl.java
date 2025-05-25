@@ -36,7 +36,7 @@ public class UserServiceImpl implements UserService {
 
         val user = this.userRepository.findByUsername(username).get();
 
-        return ServiceUtils.toGetUserDetailsResponseDto(user);
+        return ServiceUtils.toDto(user);
     }
 
     @Override
@@ -65,10 +65,10 @@ public class UserServiceImpl implements UserService {
     public Page<GetUserDetailsResponseDto> exploreUsers(String searchQuery, Pageable pageable) {
         if (StringUtils.isEmpty(searchQuery)) {
             return this.userRepository.findAllNonAdminUsers(pageable)
-                    .map(ServiceUtils::toGetUserDetailsResponseDto);
+                    .map(ServiceUtils::toDto);
         } else {
             return this.userRepository.findNonAdminUsers(searchQuery, pageable)
-                    .map(ServiceUtils::toGetUserDetailsResponseDto);
+                    .map(ServiceUtils::toDto);
         }
     }
 

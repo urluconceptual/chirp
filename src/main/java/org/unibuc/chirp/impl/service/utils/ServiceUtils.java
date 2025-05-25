@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.unibuc.chirp.domain.dto.conversation.create.CreateConversationResponseDto;
-import org.unibuc.chirp.domain.dto.conversation.get.GetConversationResponseDto;
+import org.unibuc.chirp.domain.dto.conversation.create.ConversationResponseDto;
+import org.unibuc.chirp.domain.dto.conversation.get.ConversationDetailsResponseDto;
 import org.unibuc.chirp.domain.dto.message.get.GetMessageResponseDto;
 import org.unibuc.chirp.domain.dto.user.get.FriendStatus;
 import org.unibuc.chirp.domain.dto.user.get.GetUserDetailsResponseDto;
@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 @Slf4j
 @UtilityClass
 public class ServiceUtils {
-    public GetUserDetailsResponseDto toGetUserDetailsResponseDto(UserEntity userEntity) {
+    public GetUserDetailsResponseDto toDto(UserEntity userEntity) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUserUsername = authentication.getName();
 
@@ -56,7 +56,9 @@ public class ServiceUtils {
                 userEntity.getUserProfile().getLocation(),
                 userEntity.getUserProfile().getWebsite(),
                 numberOfFriends,
-                friendStatus.toString());
+                friendStatus.toString(),
+                userEntity.getStatus().getStatus().toString(),
+                userEntity.getStatus().getLastUpdated().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
     }
 
     public UpdateUserResponseDto toDto(UserProfileEntity userProfile) {
@@ -70,16 +72,16 @@ public class ServiceUtils {
         );
     }
 
-    public static CreateConversationResponseDto toDto(ConversationEntity conversationEntity) {
-        return new CreateConversationResponseDto(
+    public static ConversationResponseDto toDto(ConversationEntity conversationEntity) {
+        return new ConversationResponseDto(
                 conversationEntity.getId(),
                 conversationEntity.getTitle()
         );
     }
 
-    public static GetConversationResponseDto toDtoGetConversation(ConversationEntity conversationEntity,
-                                                                  Page<MessageEntity> messagePage) {
-        return new GetConversationResponseDto(
+    public static ConversationDetailsResponseDto toDtoGetConversation(ConversationEntity conversationEntity,
+                                                                      Page<MessageEntity> messagePage) {
+        return new ConversationDetailsResponseDto(
                 conversationEntity.getId(),
                 conversationEntity.getTitle(),
                 conversationEntity.getParticipants().stream()
@@ -88,15 +90,18 @@ public class ServiceUtils {
                 messagePage.getContent().stream()
                         .map(ServiceUtils::toDto)
                         .toList()
+                        .reversed(),
+                messagePage.hasNext()
         );
     }
 
     public static GetMessageResponseDto toDto(MessageEntity messageEntity) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return new GetMessageResponseDto(
                 messageEntity.getId(),
                 messageEntity.getContent(),
                 messageEntity.getSender().getUsername(),
-                messageEntity.getTimestamp().toString()
+                formatter.format(messageEntity.getTimestamp())
         );
     }
 }
