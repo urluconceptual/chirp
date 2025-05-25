@@ -17,4 +17,6 @@ public interface UserService {
                                             MultipartFile avatarFile);
 
     Page<GetUserDetailsResponseDto> exploreUsers(String searchQuery, Pageable pageable);
+
+    void deleteUserByUsername(String username);
 }

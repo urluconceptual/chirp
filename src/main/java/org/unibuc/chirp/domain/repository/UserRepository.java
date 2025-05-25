@@ -15,6 +15,8 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     List<UserEntity> findAllByUsernameIn(List<String> username);
 
+    void deleteByUsername(String username);
+
     @Query("SELECT u FROM users u WHERE 'ROLE_ADMIN' NOT IN (SELECT r.name FROM u.roles r)")
     Page<UserEntity> findAllNonAdminUsers(Pageable pageable);
 

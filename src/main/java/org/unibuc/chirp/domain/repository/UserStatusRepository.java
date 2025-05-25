@@ -7,4 +7,5 @@ import java.util.Optional;
 
 public interface UserStatusRepository extends JpaRepository<UserStatusEntity, Long> {
     Optional<UserStatusEntity> findByUser_Username(String username);
+    void deleteByUser_Username(String username);
 }

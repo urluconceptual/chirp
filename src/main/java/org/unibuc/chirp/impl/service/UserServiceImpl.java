@@ -1,5 +1,6 @@
 package org.unibuc.chirp.impl.service;
 
+import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -13,8 +14,7 @@ import org.unibuc.chirp.domain.dto.user.get.GetUserResponseDto;
 import org.unibuc.chirp.domain.dto.user.update.UpdateUserRequestDto;
 import org.unibuc.chirp.domain.dto.user.update.UpdateUserResponseDto;
 import org.unibuc.chirp.domain.entity.UserProfileEntity;
-import org.unibuc.chirp.domain.repository.UserProfileRepository;
-import org.unibuc.chirp.domain.repository.UserRepository;
+import org.unibuc.chirp.domain.repository.*;
 import org.unibuc.chirp.domain.service.UserService;
 import org.unibuc.chirp.impl.mapper.UserMapper;
 import org.unibuc.chirp.impl.validator.UserValidator;
@@ -29,7 +29,12 @@ import java.util.Base64;
 public class UserServiceImpl implements UserService {
 
     private UserRepository userRepository;
+    private MessageRepository messageRepository;
     private UserProfileRepository userProfileRepository;
+    private UserStatusRepository userStatusRepository;
+    private ConversationRepository conversationRepository;
+    private UserFriendshipRepository userFriendshipRepository;
+    private RoleRepository roleRepository;
     private UserValidator userValidator;
 
     @Override
@@ -78,6 +83,21 @@ public class UserServiceImpl implements UserService {
             case "" -> this.userRepository.findAllNonAdminUsers(pageable);
             default -> this.userRepository.findNonAdminUsers(searchQuery, pageable);
         }).map(UserMapper::toDetailsDto);
+    }
+
+    @Override
+    @Transactional
+    public void deleteUserByUsername(String username) {
+        log.info("Deleting user with username: {}", username);
+        userValidator.validate(username);
+        this.userProfileRepository.deleteByUser_Username(username);
+        this.userStatusRepository.deleteByUser_Username(username);
+        this.messageRepository.deleteAllBySender_Username(username);
+        this.conversationRepository.deleteFromConversationUserByUsername(username);
+        this.conversationRepository.deleteAllByParticipantUsername(username);
+        this.userFriendshipRepository.deleteByRequesterOrAddresseeUsername(username);
+        this.roleRepository.deleteJoinColumnForUsername(username);
+        this.userRepository.deleteByUsername(username);
     }
 
     @Nullable

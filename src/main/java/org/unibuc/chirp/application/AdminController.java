@@ -9,9 +9,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.unibuc.chirp.domain.dto.user.get.GetUserDetailsResponseDto;
 import org.unibuc.chirp.domain.dto.user.get.GetUserResponseDto;
 import org.unibuc.chirp.domain.service.UserService;
 
@@ -33,5 +33,11 @@ public class AdminController {
         model.addAttribute("users", usersPage);
         model.addAttribute("search", search);
         return "all-users";
+    }
+
+    @PostMapping("/user/delete")
+    public String deleteUser(@RequestParam String username) {
+        userService.deleteUserByUsername(username);
+        return "redirect:/admin/users";
     }
 }

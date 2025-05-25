@@ -40,7 +40,7 @@ public class SecurityConfig {
                                 .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/chat").hasRole("USER")
                         .requestMatchers("/chat/**").hasRole("USER")
-                        .requestMatchers("/account/**").hasRole("USER")
+                        .requestMatchers("/account/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/friend/**").hasRole("USER")
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                                 .anyRequest().authenticated()

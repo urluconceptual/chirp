@@ -1,12 +1,10 @@
 package org.unibuc.chirp.impl.validator;
 
 import lombok.AllArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.unibuc.chirp.domain.dto.user.create.CreateUserRequestDto;
 import org.unibuc.chirp.domain.exception.AppException;
 import org.unibuc.chirp.domain.exception.ErrorCode;
-import org.unibuc.chirp.domain.repository.UserProfileRepository;
 import org.unibuc.chirp.domain.repository.UserRepository;
 
 import java.util.List;
@@ -15,7 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 public class UserValidator {
     private UserRepository userRepository;
-    private UserProfileRepository userProfileRepository;
 
     public void validate(CreateUserRequestDto createUserRequestDto) {
         if (this.userRepository.findByUsername(createUserRequestDto.username()).isPresent()) {
@@ -26,8 +23,6 @@ public class UserValidator {
     public void validate(String username) {
         if (this.userRepository.findByUsername(username).isEmpty()) {
             throw new AppException(ErrorCode.CHR0002, "User with username " + username + " not found");
-        } else if (this.userProfileRepository.findUserProfileEntityByUser_Username(username).isEmpty()) {
-            throw new AppException(ErrorCode.CHR0004);
         }
     }
 
