@@ -24,6 +24,7 @@ import org.unibuc.chirp.domain.repository.UserProfileRepository;
 import org.unibuc.chirp.domain.repository.UserRepository;
 import org.unibuc.chirp.domain.service.AuthService;
 import org.unibuc.chirp.domain.service.UserStatusService;
+import org.unibuc.chirp.impl.mapper.UserMapper;
 import org.unibuc.chirp.impl.service.utils.ServiceUtils;
 import org.unibuc.chirp.impl.validator.UserValidator;
 
@@ -47,11 +48,7 @@ public class AuthServiceImpl implements AuthService {
 
         RoleEntity role = this.roleRepository.findByName("ROLE_USER").get();
 
-        this.userRepository.save(UserEntity.builder()
-                .username(createUserRequestDto.username())
-                .password(passwordEncoder.encode(createUserRequestDto.password()))
-                .roles(Set.of(role))
-                .build());
+        this.userRepository.save(UserMapper.toUserEntity(createUserRequestDto, role, passwordEncoder));
 
         UserEntity savedUser = this.userRepository.findByUsername(createUserRequestDto.username())
                 .orElseThrow();
@@ -74,7 +71,7 @@ public class AuthServiceImpl implements AuthService {
                 SecurityContextHolder.getContext());
 
         userStatusService.updateUserStatus(loginRequestDto.username(), UserStatusEntity.StatusType.ONLINE);
-        return ServiceUtils.toDto(userRepository.findByUsername(loginRequestDto.username()).get());
+        return UserMapper.toDto(userRepository.findByUsername(loginRequestDto.username()).get());
     }
 
     @Override
