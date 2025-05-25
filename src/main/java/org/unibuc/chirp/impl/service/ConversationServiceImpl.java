@@ -47,7 +47,7 @@ public class ConversationServiceImpl implements ConversationService {
                 .participants(participantUserList)
                 .build();
 
-        return ServiceUtils.toDto(this.conversationRepository.save(conversation));
+        return ServiceUtils.toDetailsDto(this.conversationRepository.save(conversation));
     }
 
     @Override
@@ -75,6 +75,6 @@ public class ConversationServiceImpl implements ConversationService {
 
         List<ConversationEntity> conversations = this.conversationRepository.findByParticipantsUsername(username);
 
-        return conversations.stream().map(ServiceUtils::toDto).toList();
+        return conversations.stream().map(ServiceUtils::toDetailsDto).toList();
     }
 }

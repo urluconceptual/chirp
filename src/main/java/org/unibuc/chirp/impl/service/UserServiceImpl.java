@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.unibuc.chirp.domain.dto.user.get.GetUserDetailsResponseDto;
+import org.unibuc.chirp.domain.dto.user.get.GetUserResponseDto;
 import org.unibuc.chirp.domain.dto.user.update.UpdateUserRequestDto;
 import org.unibuc.chirp.domain.dto.user.update.UpdateUserResponseDto;
 import org.unibuc.chirp.domain.repository.UserProfileRepository;
@@ -36,7 +37,18 @@ public class UserServiceImpl implements UserService {
 
         val user = this.userRepository.findByUsername(username).get();
 
-        return ServiceUtils.toDto(user);
+        return ServiceUtils.toDetailsDto(user);
+    }
+
+    @Override
+    public Page<GetUserResponseDto> getUsersPage(String searchQuery, Pageable pageable) {
+        if (StringUtils.isEmpty(searchQuery)) {
+            return this.userRepository.findAll(pageable)
+                    .map(ServiceUtils::toDto);
+        } else {
+            return this.userRepository.findAll(searchQuery, pageable)
+                    .map(ServiceUtils::toDto);
+        }
     }
 
     @Override
@@ -58,17 +70,17 @@ public class UserServiceImpl implements UserService {
 
         this.userProfileRepository.save(userProfileEntity);
 
-        return ServiceUtils.toDto(userProfileEntity);
+        return ServiceUtils.toDetailsDto(userProfileEntity);
     }
 
     @Override
     public Page<GetUserDetailsResponseDto> exploreUsers(String searchQuery, Pageable pageable) {
         if (StringUtils.isEmpty(searchQuery)) {
             return this.userRepository.findAllNonAdminUsers(pageable)
-                    .map(ServiceUtils::toDto);
+                    .map(ServiceUtils::toDetailsDto);
         } else {
             return this.userRepository.findNonAdminUsers(searchQuery, pageable)
-                    .map(ServiceUtils::toDto);
+                    .map(ServiceUtils::toDetailsDto);
         }
     }
 

@@ -15,9 +15,12 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     List<UserEntity> findAllByUsernameIn(List<String> username);
 
-    @Query("SELECT u FROM users u WHERE 'ADMIN' NOT IN (SELECT r.name FROM u.roles r)")
+    @Query("SELECT u FROM users u WHERE 'ROLE_ADMIN' NOT IN (SELECT r.name FROM u.roles r)")
     Page<UserEntity> findAllNonAdminUsers(Pageable pageable);
 
-    @Query("SELECT u FROM users u WHERE 'ADMIN' NOT IN (SELECT r.name FROM u.roles r) AND (:search IS NULL OR LOWER(u.username) LIKE LOWER(CONCAT('%', :search, '%')))")
+    @Query("SELECT u FROM users u WHERE 'ROLE_ADMIN' NOT IN (SELECT r.name FROM u.roles r) AND (:search IS NULL OR LOWER(u.username) LIKE LOWER(CONCAT('%', :search, '%')))")
     Page<UserEntity> findNonAdminUsers(@Param("search") String search, Pageable pageable);
+
+    @Query("SELECT u FROM users u WHERE LOWER(u.username) LIKE LOWER(CONCAT('%', :search, '%'))")
+    Page<UserEntity> findAll(@Param("search") String search, Pageable pageable);
 }

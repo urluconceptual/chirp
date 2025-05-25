@@ -100,7 +100,7 @@ public class FriendServiceImpl implements FriendService {
         return friends.map(friendship -> {
             val friend = friendship.getRequester().equals(user) ? friendship.getAddressee() : friendship.getRequester();
 
-            return ServiceUtils.toDto(friend);
+            return ServiceUtils.toDetailsDto(friend);
         });
     }
 
@@ -112,7 +112,7 @@ public class FriendServiceImpl implements FriendService {
         val friendRequests = this.userFriendshipRepository.findByAddresseeAndStatus(user, UserFriendshipEntity.FriendshipStatus.PENDING);
 
         return friendRequests.stream()
-                .map(friendship -> ServiceUtils.toDto(friendship.getRequester()))
+                .map(friendship -> ServiceUtils.toDetailsDto(friendship.getRequester()))
                 .toList();
     }
 }

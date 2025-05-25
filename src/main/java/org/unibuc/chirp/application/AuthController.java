@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.unibuc.chirp.domain.dto.user.create.CreateUserRequestDto;
+import org.unibuc.chirp.domain.dto.user.get.GetUserResponseDto;
 import org.unibuc.chirp.domain.dto.user.login.LoginRequestDto;
 import org.unibuc.chirp.domain.service.AuthService;
 
@@ -37,7 +38,10 @@ public class AuthController {
             return "login";
         }
         try {
-            authService.loginUser(loginRequestDto, request);
+            GetUserResponseDto user = authService.loginUser(loginRequestDto, request);
+            if(user.role().equals("ROLE_ADMIN")) {
+                return "redirect:/admin/users";
+            }
             return "redirect:/chat";
         } catch (AuthenticationException ex) {
             model.addAttribute("error", "Invalid username or password");

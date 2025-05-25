@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.val;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -12,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Service;
 import org.unibuc.chirp.domain.dto.user.create.CreateUserRequestDto;
+import org.unibuc.chirp.domain.dto.user.get.GetUserResponseDto;
 import org.unibuc.chirp.domain.dto.user.login.LoginRequestDto;
 import org.unibuc.chirp.domain.entity.RoleEntity;
 import org.unibuc.chirp.domain.entity.UserEntity;
@@ -22,6 +24,7 @@ import org.unibuc.chirp.domain.repository.UserProfileRepository;
 import org.unibuc.chirp.domain.repository.UserRepository;
 import org.unibuc.chirp.domain.service.AuthService;
 import org.unibuc.chirp.domain.service.UserStatusService;
+import org.unibuc.chirp.impl.service.utils.ServiceUtils;
 import org.unibuc.chirp.impl.validator.UserValidator;
 
 import java.util.Set;
@@ -42,7 +45,7 @@ public class AuthServiceImpl implements AuthService {
     public void registerUser(CreateUserRequestDto createUserRequestDto) {
         userValidator.validate(createUserRequestDto);
 
-        RoleEntity role = this.roleRepository.findByName("USER").get();
+        RoleEntity role = this.roleRepository.findByName("ROLE_USER").get();
 
         this.userRepository.save(UserEntity.builder()
                 .username(createUserRequestDto.username())
@@ -60,7 +63,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Transactional
     @Override
-    public void loginUser(LoginRequestDto loginRequestDto, HttpServletRequest request) {
+    public GetUserResponseDto loginUser(LoginRequestDto loginRequestDto, HttpServletRequest request) {
         UsernamePasswordAuthenticationToken authToken =
                 new UsernamePasswordAuthenticationToken(loginRequestDto.username(), loginRequestDto.password());
 
@@ -71,6 +74,7 @@ public class AuthServiceImpl implements AuthService {
                 SecurityContextHolder.getContext());
 
         userStatusService.updateUserStatus(loginRequestDto.username(), UserStatusEntity.StatusType.ONLINE);
+        return ServiceUtils.toDto(userRepository.findByUsername(loginRequestDto.username()).get());
     }
 
     @Override

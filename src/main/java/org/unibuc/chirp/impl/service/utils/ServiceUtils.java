@@ -10,6 +10,7 @@ import org.unibuc.chirp.domain.dto.conversation.get.ConversationDetailsResponseD
 import org.unibuc.chirp.domain.dto.message.get.GetMessageResponseDto;
 import org.unibuc.chirp.domain.dto.user.get.FriendStatus;
 import org.unibuc.chirp.domain.dto.user.get.GetUserDetailsResponseDto;
+import org.unibuc.chirp.domain.dto.user.get.GetUserResponseDto;
 import org.unibuc.chirp.domain.dto.user.update.UpdateUserResponseDto;
 import org.unibuc.chirp.domain.entity.*;
 
@@ -19,7 +20,7 @@ import java.util.stream.Stream;
 @Slf4j
 @UtilityClass
 public class ServiceUtils {
-    public GetUserDetailsResponseDto toDto(UserEntity userEntity) {
+    public GetUserDetailsResponseDto toDetailsDto(UserEntity userEntity) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUserUsername = authentication.getName();
 
@@ -47,6 +48,11 @@ public class ServiceUtils {
                     .orElse(FriendStatus.NOT_FRIEND);
         }
 
+        String onlineStatus = userEntity.getStatus() != null?
+                userEntity.getStatus().getStatus().toString() : "OFFLINE";
+        String lastUpdated = userEntity.getStatus() != null ?
+                userEntity.getStatus().getLastUpdated().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : "N/A";
+
         return new GetUserDetailsResponseDto(
                 userEntity.getUsername(),
                 userEntity.getUserProfile().getProfilePicture(),
@@ -57,11 +63,27 @@ public class ServiceUtils {
                 userEntity.getUserProfile().getWebsite(),
                 numberOfFriends,
                 friendStatus.toString(),
-                userEntity.getStatus().getStatus().toString(),
-                userEntity.getStatus().getLastUpdated().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
+                onlineStatus,
+                lastUpdated);
     }
 
-    public UpdateUserResponseDto toDto(UserProfileEntity userProfile) {
+    public GetUserResponseDto toDto(UserEntity userEntity) {
+        String onlineStatus = userEntity.getStatus() != null?
+                userEntity.getStatus().getStatus().toString() : "OFFLINE";
+        String lastUpdated = userEntity.getStatus() != null ?
+                userEntity.getStatus().getLastUpdated().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")) : "N/A";
+
+        return new GetUserResponseDto(
+                userEntity.getUsername(),
+                userEntity.getRoles().stream()
+                        .map(RoleEntity::getName)
+                        .findFirst()
+                        .orElse("ROLE_USER"),
+                onlineStatus,
+                lastUpdated);
+    }
+
+    public UpdateUserResponseDto toDetailsDto(UserProfileEntity userProfile) {
         return new UpdateUserResponseDto(
                 userProfile.getUser().getUsername(),
                 String.valueOf(userProfile.getBirthday()),
@@ -72,7 +94,7 @@ public class ServiceUtils {
         );
     }
 
-    public static ConversationResponseDto toDto(ConversationEntity conversationEntity) {
+    public static ConversationResponseDto toDetailsDto(ConversationEntity conversationEntity) {
         return new ConversationResponseDto(
                 conversationEntity.getId(),
                 conversationEntity.getTitle()
@@ -88,14 +110,14 @@ public class ServiceUtils {
                         .map(UserEntity::getUsername)
                         .toList(),
                 messagePage.getContent().stream()
-                        .map(ServiceUtils::toDto)
+                        .map(ServiceUtils::toDetailsDto)
                         .toList()
                         .reversed(),
                 messagePage.hasNext()
         );
     }
 
-    public static GetMessageResponseDto toDto(MessageEntity messageEntity) {
+    public static GetMessageResponseDto toDetailsDto(MessageEntity messageEntity) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return new GetMessageResponseDto(
                 messageEntity.getId(),
