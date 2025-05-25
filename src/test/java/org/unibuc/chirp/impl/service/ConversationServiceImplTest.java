@@ -21,7 +21,6 @@ import org.unibuc.chirp.domain.repository.MessageRepository;
 import org.unibuc.chirp.domain.repository.UserRepository;
 import org.unibuc.chirp.domain.service.AuthService;
 import org.unibuc.chirp.domain.service.FriendService;
-import org.unibuc.chirp.domain.service.MessageService;
 
 import java.util.List;
 
@@ -29,7 +28,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@DisplayName("UserService Tests")
+@DisplayName("Conversation Tests")
 @Transactional
 class ConversationServiceImplTest {
 
@@ -40,8 +39,6 @@ class ConversationServiceImplTest {
     private UserRepository userRepository;
     @Autowired
     private ConversationRepository conversationRepository;
-    @Autowired
-    private MessageRepository messageRepository;
 
     @Autowired
     private AuthService authService;
