@@ -1,6 +1,7 @@
 package org.unibuc.chirp.config;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,6 +17,7 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @AllArgsConstructor
+@Slf4j
 public class SecurityConfig {
     private final UserDetailsService userDetailsService;
 
@@ -35,12 +37,12 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.ignoringRequestMatchers(new AntPathRequestMatcher("/auth/logout-beacon")))
                 .authorizeHttpRequests(auth -> auth
                                 .requestMatchers("/").permitAll()
-                                .requestMatchers("/**").permitAll()
                                 .requestMatchers("/auth/**").permitAll()
-//                        .requestMatchers("/chat").hasRole("USER")
-//                        .requestMatchers("/chat/**").hasRole("USER")
-//                        .requestMatchers("/account/**").hasRole("USER")
-//                        .requestMatchers("/friend/**").hasRole("USER")
+                        .requestMatchers("/chat").hasRole("USER")
+                        .requestMatchers("/chat/**").hasRole("USER")
+                        .requestMatchers("/account/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/friend/**").hasRole("USER")
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
                                 .anyRequest().authenticated()
                 )
                 .formLogin(AbstractHttpConfigurer::disable)

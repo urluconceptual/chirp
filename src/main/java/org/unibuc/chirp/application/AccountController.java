@@ -43,6 +43,12 @@ public class AccountController {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = authentication.getName();
+        String role = authentication.getAuthorities().stream()
+                .map(grantedAuthority -> grantedAuthority.getAuthority())
+                .findFirst()
+                .orElse("");
+
+        model.addAttribute("isAdmin", "ROLE_ADMIN".equals(role));
         if (username.equals(currentUsername)) {
             return "redirect:/account/my-account";
         }

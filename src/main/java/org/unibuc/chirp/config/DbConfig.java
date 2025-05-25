@@ -16,10 +16,9 @@ public class DbConfig {
     @Bean
     CommandLineRunner initDb(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
         return args -> {
-            createRoleIfNotFound("USER", roleRepository);
-            createRoleIfNotFound("ADMIN", roleRepository);
+            createRoleIfNotFound("ROLE_USER", roleRepository);
+            createRoleIfNotFound("ROLE_ADMIN", roleRepository);
             createUserIfNotFound("admin", passwordEncoder.encode("admin"), userRepository, roleRepository);
-            createUserIfNotFound("user", passwordEncoder.encode("user"), userRepository, roleRepository);
         };
     }
 
@@ -28,7 +27,7 @@ public class DbConfig {
     }
 
     private void createUserIfNotFound(String username, String password, UserRepository userRepository, RoleRepository roleRepository) {
-        final RoleEntity roleEntity = roleRepository.findByName("ADMIN").get();
+        final RoleEntity roleEntity = roleRepository.findByName("ROLE_ADMIN").get();
         final UserEntity userEntity = UserEntity.builder()
                 .username(username)
                 .password(password)

@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -12,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.stereotype.Service;
 import org.unibuc.chirp.domain.dto.user.create.CreateUserRequestDto;
+import org.unibuc.chirp.domain.dto.user.get.GetUserResponseDto;
 import org.unibuc.chirp.domain.dto.user.login.LoginRequestDto;
 import org.unibuc.chirp.domain.entity.RoleEntity;
 import org.unibuc.chirp.domain.entity.UserEntity;
@@ -22,12 +24,12 @@ import org.unibuc.chirp.domain.repository.UserProfileRepository;
 import org.unibuc.chirp.domain.repository.UserRepository;
 import org.unibuc.chirp.domain.service.AuthService;
 import org.unibuc.chirp.domain.service.UserStatusService;
+import org.unibuc.chirp.impl.mapper.UserMapper;
 import org.unibuc.chirp.impl.validator.UserValidator;
-
-import java.util.Set;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class AuthServiceImpl implements AuthService {
     private PasswordEncoder passwordEncoder;
     private UserRepository userRepository;
@@ -40,15 +42,12 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     @Override
     public void registerUser(CreateUserRequestDto createUserRequestDto) {
+        log.info("Registering user with username: {}", createUserRequestDto.username());
         userValidator.validate(createUserRequestDto);
 
-        RoleEntity role = this.roleRepository.findByName("USER").get();
+        RoleEntity role = this.roleRepository.findByName("ROLE_USER").get();
 
-        this.userRepository.save(UserEntity.builder()
-                .username(createUserRequestDto.username())
-                .password(passwordEncoder.encode(createUserRequestDto.password()))
-                .roles(Set.of(role))
-                .build());
+        this.userRepository.save(UserMapper.toUserEntity(createUserRequestDto, role, passwordEncoder));
 
         UserEntity savedUser = this.userRepository.findByUsername(createUserRequestDto.username())
                 .orElseThrow();
@@ -56,11 +55,13 @@ public class AuthServiceImpl implements AuthService {
         this.userProfileRepository.save(UserProfileEntity.builder()
                 .user(savedUser)
                 .build());
+        log.info("Registered user with username: {}", createUserRequestDto.username());
     }
 
     @Transactional
     @Override
-    public void loginUser(LoginRequestDto loginRequestDto, HttpServletRequest request) {
+    public GetUserResponseDto loginUser(LoginRequestDto loginRequestDto, HttpServletRequest request) {
+        log.info("Logging in user with username: {}", loginRequestDto.username());
         UsernamePasswordAuthenticationToken authToken =
                 new UsernamePasswordAuthenticationToken(loginRequestDto.username(), loginRequestDto.password());
 
@@ -71,12 +72,14 @@ public class AuthServiceImpl implements AuthService {
                 SecurityContextHolder.getContext());
 
         userStatusService.updateUserStatus(loginRequestDto.username(), UserStatusEntity.StatusType.ONLINE);
+        return UserMapper.toDto(userRepository.findByUsername(loginRequestDto.username()).get());
     }
 
     @Override
     public void logoutUser(HttpServletRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
+        log.info("Logging out user with username: {}", username);
 
         HttpSession session = request.getSession(false);
         if (session != null) {

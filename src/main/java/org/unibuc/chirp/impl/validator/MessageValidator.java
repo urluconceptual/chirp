@@ -1,9 +1,11 @@
 package org.unibuc.chirp.impl.validator;
 
 import lombok.AllArgsConstructor;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
 import org.unibuc.chirp.domain.dto.message.create.CreateMessageRequestDto;
 import org.unibuc.chirp.domain.exception.AppException;
+import org.unibuc.chirp.domain.exception.ErrorCode;
 
 @Component
 @AllArgsConstructor
@@ -15,8 +17,8 @@ public class MessageValidator {
         conversationValidator.validate(createMessageRequestDto.chatId());
         userValidator.validate(createMessageRequestDto.senderUsername());
 
-        if (createMessageRequestDto.content() == null || createMessageRequestDto.content().isEmpty()) {
-            throw new IllegalArgumentException("Message content cannot be null or empty");
+        if (Strings.isEmpty(createMessageRequestDto.content())) {
+            throw new AppException(ErrorCode.CHR0009);
         }
     }
 }

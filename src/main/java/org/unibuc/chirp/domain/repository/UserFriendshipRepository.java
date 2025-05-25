@@ -3,6 +3,7 @@ package org.unibuc.chirp.domain.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.unibuc.chirp.domain.entity.UserEntity;
@@ -34,4 +35,11 @@ public interface UserFriendshipRepository extends JpaRepository<UserFriendshipEn
 
     List<UserFriendshipEntity> findByAddresseeAndStatus(UserEntity addressee,
                                                         UserFriendshipEntity.FriendshipStatus status);
+
+    @Modifying
+    @Query("""
+    DELETE FROM user_friendships f
+    WHERE f.requester.username = :username OR f.addressee.username = :username
+    """)
+    void deleteByRequesterOrAddresseeUsername(@Param("username") String username);
 }

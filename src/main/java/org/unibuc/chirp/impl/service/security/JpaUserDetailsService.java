@@ -1,6 +1,7 @@
 package org.unibuc.chirp.impl.service.security;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -9,6 +10,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.unibuc.chirp.domain.entity.RoleEntity;
 import org.unibuc.chirp.domain.entity.UserEntity;
+import org.unibuc.chirp.domain.exception.AppException;
+import org.unibuc.chirp.domain.exception.ErrorCode;
 import org.unibuc.chirp.domain.repository.UserRepository;
 
 import java.util.Collection;
@@ -24,13 +27,9 @@ public class JpaUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        UserEntity user;
 
-        Optional<UserEntity> userOpt= userRepository.findByUsername(username);
-        if (userOpt.isPresent())
-            user = userOpt.get();
-        else
-            throw new UsernameNotFoundException("Username: " + username);
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new AppException(ErrorCode.CHR0002));
 
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
@@ -43,8 +42,7 @@ public class JpaUserDetailsService implements UserDetailsService {
             return new HashSet<>();
         } else if (authorities.isEmpty()){
             return new HashSet<>();
-        }
-        else{
+        } else {
             return authorities.stream()
                     .map(RoleEntity::getName)
                     .map(SimpleGrantedAuthority::new)
