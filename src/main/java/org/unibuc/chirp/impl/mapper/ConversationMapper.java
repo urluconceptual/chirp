@@ -4,11 +4,12 @@ import lombok.experimental.UtilityClass;
 import org.springframework.data.domain.Page;
 import org.unibuc.chirp.domain.dto.conversation.create.ConversationResponseDto;
 import org.unibuc.chirp.domain.dto.conversation.get.ConversationDetailsResponseDto;
+import org.unibuc.chirp.domain.dto.message.get.GetMessageResponseDto;
 import org.unibuc.chirp.domain.entity.ConversationEntity;
 import org.unibuc.chirp.domain.entity.MessageEntity;
 import org.unibuc.chirp.domain.entity.UserEntity;
-import org.unibuc.chirp.impl.service.utils.ServiceUtils;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @UtilityClass
@@ -21,14 +22,14 @@ public class ConversationMapper {
                 .build();
     }
 
-    public static ConversationResponseDto toDto(ConversationEntity conversationEntity) {
+    public ConversationResponseDto toDto(ConversationEntity conversationEntity) {
         return new ConversationResponseDto(
                 conversationEntity.getId(),
                 conversationEntity.getTitle()
         );
     }
 
-    public static ConversationDetailsResponseDto toDto(ConversationEntity conversationEntity,
+    public ConversationDetailsResponseDto toDto(ConversationEntity conversationEntity,
                                                        Page<MessageEntity> messagePage) {
         return new ConversationDetailsResponseDto(
                 conversationEntity.getId(),
@@ -37,11 +38,20 @@ public class ConversationMapper {
                         .map(UserEntity::getUsername)
                         .toList(),
                 messagePage.getContent().stream()
-                        .map(ServiceUtils::toDetailsDto)
+                        .map(ConversationMapper::toDetailsDto)
                         .toList()
                         .reversed(),
                 messagePage.hasNext()
         );
     }
 
+    public GetMessageResponseDto toDetailsDto(MessageEntity messageEntity) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return new GetMessageResponseDto(
+                messageEntity.getId(),
+                messageEntity.getContent(),
+                messageEntity.getSender().getUsername(),
+                formatter.format(messageEntity.getTimestamp())
+        );
+    }
 }

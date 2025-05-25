@@ -13,7 +13,6 @@ import org.unibuc.chirp.domain.repository.UserRepository;
 import org.unibuc.chirp.domain.service.FriendService;
 import org.unibuc.chirp.impl.mapper.FriendMapper;
 import org.unibuc.chirp.impl.mapper.UserMapper;
-import org.unibuc.chirp.impl.service.utils.ServiceUtils;
 import org.unibuc.chirp.impl.validator.FriendValidator;
 import org.unibuc.chirp.impl.validator.UserValidator;
 

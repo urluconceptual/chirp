@@ -2,7 +2,6 @@ package org.unibuc.chirp.impl.service;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.val;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
@@ -17,7 +16,6 @@ import org.unibuc.chirp.domain.repository.UserProfileRepository;
 import org.unibuc.chirp.domain.repository.UserRepository;
 import org.unibuc.chirp.domain.service.UserService;
 import org.unibuc.chirp.impl.mapper.UserMapper;
-import org.unibuc.chirp.impl.service.utils.ServiceUtils;
 import org.unibuc.chirp.impl.validator.UserValidator;
 
 import java.io.IOException;

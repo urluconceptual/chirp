@@ -3,7 +3,6 @@ package org.unibuc.chirp.impl.service;
 import lombok.AllArgsConstructor;
 import lombok.val;
 import org.springframework.stereotype.Service;
-import org.unibuc.chirp.domain.entity.UserEntity;
 import org.unibuc.chirp.domain.entity.UserStatusEntity;
 import org.unibuc.chirp.domain.repository.UserRepository;
 import org.unibuc.chirp.domain.repository.UserStatusRepository;
@@ -11,7 +10,6 @@ import org.unibuc.chirp.domain.service.UserStatusService;
 import org.unibuc.chirp.impl.mapper.UserMapper;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 @AllArgsConstructor
