@@ -81,6 +81,14 @@
                                         </h5>
                                         <p th:text="${user.bio != null ? user.bio : 'No bio'}"
                                            class="mb-0 text-muted"></p>
+                                        <p class="mb-0">
+                                              <span th:if="${user.onlineStatus == 'ONLINE'}" class="text-success">
+                                                Online
+                                              </span>
+                                              <span th:if="${user.onlineStatus != 'ONLINE'}" class="text-muted">
+                                                Offline <span th:text="'since ' + ${user.lastUpdatedStatus}"></span>
+                                              </span>
+                                        </p>
                                     </div>
                                 </div>
 

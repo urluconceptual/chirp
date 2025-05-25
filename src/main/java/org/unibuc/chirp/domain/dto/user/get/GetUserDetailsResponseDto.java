@@ -8,5 +8,7 @@ public record GetUserDetailsResponseDto(
         String location,
         String website,
         Integer numberOfFriends,
-        String friendStatus) {
+        String friendStatus,
+        String onlineStatus,
+        String lastUpdatedStatus) {
 }

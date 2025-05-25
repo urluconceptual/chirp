@@ -56,7 +56,9 @@ public class ServiceUtils {
                 userEntity.getUserProfile().getLocation(),
                 userEntity.getUserProfile().getWebsite(),
                 numberOfFriends,
-                friendStatus.toString());
+                friendStatus.toString(),
+                userEntity.getStatus().getStatus().toString(),
+                userEntity.getStatus().getLastUpdated().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")));
     }
 
     public UpdateUserResponseDto toDto(UserProfileEntity userProfile) {
