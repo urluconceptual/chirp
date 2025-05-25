@@ -2,6 +2,7 @@ package org.unibuc.chirp.impl.service;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.data.domain.Page;
@@ -28,6 +29,7 @@ import java.util.List;
 @Slf4j
 @Service
 @AllArgsConstructor
+@Getter
 public class ConversationServiceImpl implements ConversationService {
     private UserRepository userRepository;
     private ConversationRepository conversationRepository;

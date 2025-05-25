@@ -19,7 +19,7 @@ public class ConversationEntity {
 
     private String title;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "conversation_user",
             joinColumns = @JoinColumn(name = "conversation_id"),
