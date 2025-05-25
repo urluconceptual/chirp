@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 @Slf4j
 @UtilityClass
 public class ServiceUtils {
-    public GetUserDetailsResponseDto toGetUserDetailsResponseDto(UserEntity userEntity) {
+    public GetUserDetailsResponseDto toDto(UserEntity userEntity) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUserUsername = authentication.getName();
 
@@ -88,15 +88,18 @@ public class ServiceUtils {
                 messagePage.getContent().stream()
                         .map(ServiceUtils::toDto)
                         .toList()
+                        .reversed(),
+                messagePage.hasNext()
         );
     }
 
     public static GetMessageResponseDto toDto(MessageEntity messageEntity) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         return new GetMessageResponseDto(
                 messageEntity.getId(),
                 messageEntity.getContent(),
                 messageEntity.getSender().getUsername(),
-                messageEntity.getTimestamp().toString()
+                formatter.format(messageEntity.getTimestamp())
         );
     }
 }

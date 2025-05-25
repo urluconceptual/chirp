@@ -45,20 +45,25 @@
             <h2>New Chat</h2>
             <div class="card mt-4">
                 <div class="card-body">
+                    <div class="mb-3">
+                        <label for="chatTitle" class="form-label">Chat Title (optional)</label>
+                        <input type="text" id="chatTitle" class="form-control" placeholder="Enter a chat title..."/>
+                    </div>
+
                     <h4>Friends</h4>
                     <div th:if="${friends.empty}">You have no friends yet.</div>
                     <div class="list-group" th:if="${!friends.content.empty}">
-                        <div class="list-group-item list-group-item-action" th:each="user : ${friends.content}">
-                            <a th:href="@{/chat/new/start(friendUsername=${user.username})}"
-                               class="d-flex align-items-center justify-content-between text-decoration-none text-dark">
+                        <div class="list-group-item list-group-item-action"
+                             th:each="user : ${friends.content}">
+                            <a href="javascript:void(0)"
+                               class="d-flex align-items-center justify-content-between text-decoration-none text-dark start-chat"
+                               th:data-username="${user.username}">
                                 <div class="d-flex align-items-center">
                                     <img th:src="${user.profilePicture != null} ? ${'data:image/png;base64,' + user.profilePicture} : '/images/default-profile.jpg'"
                                          class="rounded-circle me-3"
                                          style="width: 50px; height: 50px; object-fit: cover;"/>
                                     <div>
-                                        <h5>
-                                            <span th:text="${user.username}"></span>
-                                        </h5>
+                                        <h5><span th:text="${user.username}"></span></h5>
                                     </div>
                                 </div>
                             </a>
@@ -68,8 +73,7 @@
                             <ul class="pagination">
                                 <li th:each="i : ${#numbers.sequence(0, friends.totalPages - 1)}"
                                     th:classappend="${friends.number == i} ? 'active'">
-                                    <a class="page-link" th:href="@{/account/friends(page=${i})}"
-                                       th:text="${i + 1}">1</a>
+                                    <a class="page-link" th:href="@{/account/friends(page=${i})}" th:text="${i + 1}">1</a>
                                 </li>
                             </ul>
                         </nav>
@@ -79,5 +83,21 @@
         </div>
     </div>
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const chatTitleInput = document.getElementById("chatTitle");
+
+        document.querySelectorAll(".start-chat").forEach(el => {
+            el.addEventListener("click", () => {
+                const friendUsername = el.getAttribute("data-username");
+                const chatTitle = chatTitleInput.value;
+                const url = `/chat/new/start?friendUsername=${encodeURIComponent(friendUsername)}`
+                    + (chatTitle ? `&title=${encodeURIComponent(chatTitle)}` : '');
+
+                window.location.href = url;
+            });
+        });
+    });
+</script>
 </body>
 </html>

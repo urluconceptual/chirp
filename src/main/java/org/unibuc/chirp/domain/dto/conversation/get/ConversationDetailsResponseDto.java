@@ -8,5 +8,6 @@ public record ConversationDetailsResponseDto(
         Long id,
         String title,
         List<String> participantList,
-        List<GetMessageResponseDto> messages
+        List<GetMessageResponseDto> messages,
+        boolean hasMoreMessages
 ) {}

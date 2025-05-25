@@ -40,18 +40,18 @@
             <a th:href="@{/account/explore}">Explore</a>
             <a th:href="@{/account/my-account}">My Account</a>
         </div>
-        <div class="col-md-3 mt-3 border-end" style="height: 100vh; overflow-y: auto;">
-            <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="col-md-3 border-end" style="overflow-y: auto;">
+            <div class="d-flex justify-content-between align-items-center mx-3">
                 <h4 class="mb-0">Your Chats</h4>
                 <a th:href="@{/chat/new}" class="btn btn-primary">New Chat</a>
             </div>
             <ul class="list-group" th:if="${chats != null and !#lists.isEmpty(chats)}">
-                <li
-                        class="list-group-item list-group-item-action"
-                        th:each="cht : ${chats}"
-                        th:classappend="${chat != null && cht.id == chat.id} ? 'list-group-item-success'">
-                    <a th:href="@{/chat/messages/{id}(id=${cht.id})}"
-                       th:text="${cht.title}"
+                <li class="list-group-item list-group-item-action"
+                    th:each="cht : ${chats}"
+                    th:classappend="${chat != null && cht.id == chat.id} ? 'list-group-item-success'"
+                >
+                    <a th:text="${cht.title}"
+                       th:href="@{/chat/messages/{id}(id=${cht.id})}"
                        class="text-decoration-none">
                         Chat participants
                     </a>
@@ -63,25 +63,66 @@
             </p>
         </div>
 
-        <div class="col-md-7" style="height: 100vh; overflow-y: auto;"
+        <div class="col-md-7 d-flex flex-column justify-content-between" style="overflow-y: auto;"
              th:if="${chat != null}">
-            <h4 class="mt-3">Chat messages</h4>
-            <div id="messages" style="height: 90vh; overflow-y: auto;">
-                <div th:each="msg : ${messages}">
-                    <strong th:text="${msg.senderUsername}"></strong>: <span th:text="${msg.content}"></span>
-                    <br/>
-                </div>
-                <p class="text-muted" th:if="${messages == null or #lists.isEmpty(messages)}">
-                    You have no messages in this chat yet.
-                </p>
-            </div>
+            <h4 class="mt-4">Chat messages</h4>
+            <div class="card h-100 d-flex flex-column">
+                <div id="messages" th:attr="data-chatid=${chat.id}" class="card-body overflow-auto flex-grow-1"
+                     style="height: 400px;">
+                    <div th:each="msg : ${chat.messages}" class="mb-3">
+                        <div>
+                            <strong th:text="${msg.senderUsername}"></strong>:
+                            <span th:text="${msg.content}"></span>
+                        </div>
+                        <small class="text-muted" th:text="${msg.timestamp}"></small>
+                    </div>
 
-            <form th:action="@{/chat/{id}/send(id=${chat.id})}" method="post" class="mt-3 d-flex">
-                <input name="message" class="form-control me-2" placeholder="Type your message..." autocomplete="off"/>
-                <button type="submit" class="btn btn-primary">Send</button>
-            </form>
+                    <p class="text-muted" th:if="${chat.messages == null or #lists.isEmpty(chat.messages)}">
+                        You have no messages in this chat yet.
+                    </p>
+                </div>
+
+                <form th:action="@{/chat/send/{id}(id=${chat.id})}" method="post" class="card-footer d-flex mt-auto">
+                    <input name="message" class="form-control me-2" placeholder="Type your message..."
+                           autocomplete="off"/>
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+<script>
+    window.onload = function () {
+        const messagesDiv = document.getElementById("messages");
+        const chatId = messagesDiv.getAttribute('data-chatid');
+        let currentPage = 0;
+        const pageSize = 15;
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+        const onScroll = async () => {
+            if (messagesDiv.scrollTop < 50) {
+                currentPage++;
+                const response = await fetch(`/chat/messages/${chatId}/page?page=${currentPage}&size=${pageSize}`);
+                if (!response.ok) return;
+
+                const data = await response.json();
+                for (const msg of data.messages.reverse()) {
+                    const msgDiv = document.createElement('div');
+                    msgDiv.classList.add('mb-3');
+                    msgDiv.innerHTML = `<div><strong>${msg.senderUsername}</strong>: <span>${msg.content}</span></div><small class="text-muted">${msg.timestamp}</small>`;
+                    messagesDiv.prepend(msgDiv);
+                }
+
+                if (data.hasMoreMessages) {
+                    messagesDiv.scrollTop = 50;
+                } else {
+                    messagesDiv.removeEventListener('scroll', onScroll);
+                }
+            }
+        };
+
+        messagesDiv.addEventListener('scroll', onScroll);
+    };
+</script>
 </body>
 </html>

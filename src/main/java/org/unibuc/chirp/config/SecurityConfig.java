@@ -31,7 +31,11 @@ public class SecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/**").permitAll()
+                        .requestMatchers("/").permitAll()
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/chat/**").hasRole("USER")
+                        .requestMatchers("/account/**").hasRole("USER")
+                        .requestMatchers("/friend/**").hasRole("USER")
                         .anyRequest().authenticated()
                 )
                 .userDetailsService(userDetailsService)

@@ -50,26 +50,16 @@ public class ConversationServiceImpl implements ConversationService {
         return ServiceUtils.toDto(this.conversationRepository.save(conversation));
     }
 
-    /**
-     * Retrieves a conversation by its ID and returns the conversation details along with the messages in it.
-     * The messages are paginated based on the provided offset and limit, sorted by timestamp in descending order,
-     * thus showing the most recent messages first.
-     *
-     * @param conversationId            the ID of the conversation to retrieve
-     * @param getConversationRequestDto the request DTO containing pagination information
-     */
     @Override
     @Transactional
     public ConversationDetailsResponseDto getConversation(Long conversationId,
                                                           GetConversationRequestDto getConversationRequestDto) {
         conversationValidator.validate(conversationId);
-
-        @SuppressWarnings("OptionalGetWithoutIsPresent")
         val conversation = this.conversationRepository.findById(conversationId).get();
 
         Pageable pageable = PageRequest.of(
-                getConversationRequestDto.offset(),
-                getConversationRequestDto.limit(),
+                getConversationRequestDto.page(),
+                getConversationRequestDto.size(),
                 Sort.by(Sort.Direction.DESC, "timestamp")
         );
 

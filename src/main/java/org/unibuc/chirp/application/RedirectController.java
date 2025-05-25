@@ -10,4 +10,7 @@ public class RedirectController {
     public String redirectToLogin() {
         return "redirect:/auth/login";
     }
+
+    @GetMapping("/access_denied")
+    public String accessDeniedPage(){ return "access-denied"; }
 }
