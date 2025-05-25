@@ -33,7 +33,7 @@
 
 <div class="container-fluid">
     <div class="row">
-        <div class="col-md-2 sidebar" th:if="!isAdmin">
+        <div class="col-md-2 sidebar" th:if="${!isAdmin}">
             <h4 class="p-3">Chirp</h4>
             <a th:href="@{/chat}">Chats</a>
             <a th:href="@{/friend/all}">My Friends</a>
@@ -55,7 +55,7 @@
 
                         <p class="text-muted" th:text="'Friends: ' + ${user.numberOfFriends}">Friends: 0</p>
 
-                        <div th:if="!isAdmin" th:switch="${user.friendStatus}">
+                        <div th:if="${!isAdmin}" th:switch="${user.friendStatus}">
                             <form th:case="'NOT_FRIEND'" th:action="@{/friends/add}" method="post">
                                 <input type="hidden" name="userId" th:value="${user.username}"/>
                                 <button type="submit" class="btn btn-outline-primary">Add Friend
