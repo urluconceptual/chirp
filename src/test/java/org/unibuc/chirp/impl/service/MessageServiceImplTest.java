@@ -21,6 +21,8 @@ import org.unibuc.chirp.domain.repository.MessageRepository;
 import org.unibuc.chirp.domain.repository.UserRepository;
 import org.unibuc.chirp.domain.service.AuthService;
 import org.unibuc.chirp.domain.service.FriendService;
+import org.unibuc.chirp.impl.mapper.MessageMapper;
+import org.unibuc.chirp.impl.validator.MessageValidator;
 
 import java.util.List;
 
@@ -93,9 +95,9 @@ class MessageServiceImplTest {
         @DisplayName("Should inject dependencies properly")
         void shouldInjectDependencies() {
             assertAll(
-                () -> assertEquals(MessageServiceImpl.class, messageService.getClass()),
-                () -> assertEquals(ConversationServiceImpl.class, conversationService.getClass()),
-                () -> assertEquals(UserRepository.class, userRepository.getClass())
+                () -> assertInstanceOf(MessageMapper.class, messageService.getMessageMapper()),
+                () -> assertInstanceOf(MessageRepository.class, messageService.getMessageRepository()),
+                () -> assertInstanceOf(MessageValidator.class, messageService.getMessageValidator())
             );
         }
     }
@@ -129,6 +131,43 @@ class MessageServiceImplTest {
                 "Expected AppException when sending empty message");
 
             assertEquals(ErrorCode.CHR0009.getMessage(), exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Should throw exception when sending null message")
+        void shouldThrowExceptionWhenSendingNullMessage() {
+            CreateMessageRequestDto requestDto = new CreateMessageRequestDto(conversationResponseDto.id(),
+                    firstUser.getUsername(), null);
+
+            val exception = assertThrows(AppException.class, () -> messageService.send(requestDto),
+                "Expected AppException when sending null message");
+
+            assertEquals(ErrorCode.CHR0009.getMessage(), exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Should throw exception when conversation does not exist")
+        void shouldThrowExceptionWhenConversationDoesNotExist() {
+            String content = "This conversation does not exist";
+            CreateMessageRequestDto requestDto = new CreateMessageRequestDto(999L, firstUser.getUsername(), content);
+
+            val exception = assertThrows(AppException.class, () -> messageService.send(requestDto),
+                "Expected AppException when conversation does not exist");
+
+            assertEquals(ErrorCode.CHR0007.getMessage(), exception.getMessage());
+        }
+
+        @Test
+        @DisplayName("Should throw exception when user does not exist")
+        void shouldThrowExceptionWhenUserDoesNotExist() {
+            String content = "This user does not exist";
+            CreateMessageRequestDto requestDto = new CreateMessageRequestDto(conversationResponseDto.id(),
+                    "nonExistentUser", content);
+
+            val exception = assertThrows(AppException.class, () -> messageService.send(requestDto),
+                "Expected AppException when user does not exist");
+
+            assertEquals(ErrorCode.CHR0002.getMessage() + ": User with username nonExistentUser not found", exception.getMessage());
         }
     }
 }

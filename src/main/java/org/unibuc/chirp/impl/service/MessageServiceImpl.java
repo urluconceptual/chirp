@@ -1,6 +1,7 @@
 package org.unibuc.chirp.impl.service;
 
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.unibuc.chirp.domain.dto.message.create.CreateMessageRequestDto;
@@ -12,6 +13,7 @@ import org.unibuc.chirp.impl.validator.MessageValidator;
 @Slf4j
 @Service
 @AllArgsConstructor
+@Getter
 public class MessageServiceImpl implements MessageService {
     private final MessageRepository messageRepository;
     private final MessageValidator messageValidator;
