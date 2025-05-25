@@ -2,6 +2,7 @@ package org.unibuc.chirp.impl.service;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.function.Consumer;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 @Getter
@@ -31,6 +33,7 @@ public class FriendServiceImpl implements FriendService {
 
     @Override
     public void sendFriendRequest(String currentUsername, String targetUsername) {
+        log.info("Sending friend request for {} to {}", currentUsername, targetUsername);
         this.userValidator.validate(currentUsername);
         this.userValidator.validate(targetUsername);
 
@@ -47,12 +50,14 @@ public class FriendServiceImpl implements FriendService {
 
     @Override
     public void acceptFriendRequest(String currentUsername, String targetUsername) {
+        log.info("Accepting friend request for {} to {}", currentUsername, targetUsername);
         this.updateFriendshipRequest(currentUsername, targetUsername, UserFriendshipEntity.FriendshipStatus.ACCEPTED,
                 friendship -> friendValidator.validateAccept(friendship));
     }
 
     @Override
     public void rejectFriendRequest(String currentUsername, String targetUsername) {
+        log.info("Rejecting friend request for {} to {}", currentUsername, targetUsername);
         this.updateFriendshipRequest(currentUsername, targetUsername, UserFriendshipEntity.FriendshipStatus.REJECTED,
                 friendship -> friendValidator.validateReject(friendship));
     }
@@ -72,6 +77,7 @@ public class FriendServiceImpl implements FriendService {
 
     @Override
     public void removeFriend(String currentUsername, String targetUsername) {
+        log.info("Removing friend {} from {}", targetUsername, currentUsername);
         UserFriendshipEntity friendship = this.getFriendship(currentUsername, targetUsername);
 
         this.friendValidator.validateRemove(friendship);
@@ -80,6 +86,7 @@ public class FriendServiceImpl implements FriendService {
     }
 
     private UserFriendshipEntity getFriendship(String currentUsername, String targetUsername) {
+        log.info("Getting friendship between {} and {}", currentUsername, targetUsername);
         this.userValidator.validate(currentUsername);
         this.userValidator.validate(targetUsername);
 
@@ -92,6 +99,7 @@ public class FriendServiceImpl implements FriendService {
 
     @Override
     public Page<GetUserDetailsResponseDto> getFriends(String username, Pageable pageable) {
+        log.info("Getting friends for user: {}", username);
         this.userValidator.validate(username);
 
         val user = this.userRepository.findByUsername(username).orElseThrow();
@@ -107,6 +115,7 @@ public class FriendServiceImpl implements FriendService {
 
     @Override
     public List<GetUserDetailsResponseDto> getFriendRequests(String username) {
+        log.info("Getting friend requests for user: {}", username);
         this.userValidator.validate(username);
 
         val user = this.userRepository.findByUsername(username).orElseThrow();

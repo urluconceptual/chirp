@@ -1,6 +1,7 @@
 package org.unibuc.chirp.impl.service;
 
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.unibuc.chirp.domain.entity.UserStatusEntity;
@@ -11,6 +12,7 @@ import org.unibuc.chirp.impl.mapper.UserMapper;
 
 import java.time.LocalDateTime;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 public class UserStatusServiceImpl implements UserStatusService {
@@ -19,6 +21,7 @@ public class UserStatusServiceImpl implements UserStatusService {
 
     @Override
     public void updateUserStatus(String username, UserStatusEntity.StatusType statusType) {
+        log.info("Updating user status for {}", username);
         boolean userHasStatus = userStatusRepository.findByUser_Username(username).isPresent();
 
         if (!userHasStatus) {

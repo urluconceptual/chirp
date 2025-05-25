@@ -2,6 +2,7 @@ package org.unibuc.chirp.impl.service;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.lang.Nullable;
@@ -21,6 +22,7 @@ import org.unibuc.chirp.impl.validator.UserValidator;
 import java.io.IOException;
 import java.util.Base64;
 
+@Slf4j
 @Service
 @AllArgsConstructor
 @Getter
@@ -32,6 +34,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public GetUserDetailsResponseDto getUserDetails(String username) {
+        log.info("Getting user details for username: {}", username);
         userValidator.validate(username);
 
         return UserMapper.toDetailsDto(this.userRepository
@@ -42,6 +45,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<GetUserResponseDto> getUsersPage(String searchQuery, Pageable pageable) {
+        log.info("Getting users page with search query: {}", searchQuery);
         searchQuery = searchQuery == null ? "" : searchQuery.trim();
 
         return (switch (searchQuery) {
@@ -53,6 +57,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UpdateUserResponseDto updateUserDetails(String username, UpdateUserRequestDto updateUserRequestDto,
                                                    MultipartFile avatarFile) {
+        log.info("Updating user details for username: {}", username);
         userValidator.validate(username);
 
         UserProfileEntity userProfileEntity =
@@ -66,6 +71,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Page<GetUserDetailsResponseDto> exploreUsers(String searchQuery, Pageable pageable) {
+        log.info("Exploring users with search query: {}", searchQuery);
         searchQuery = searchQuery == null ? "" : searchQuery.trim();
 
         return (switch (searchQuery) {
@@ -76,6 +82,7 @@ public class UserServiceImpl implements UserService {
 
     @Nullable
     private String uploadAvatarFile(MultipartFile avatarFile) {
+        log.info("Uploading avatar file");
         if (avatarFile == null || avatarFile.isEmpty())
             return null;
         try {

@@ -1,6 +1,7 @@
 package org.unibuc.chirp.impl.service.security;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.util.Strings;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -43,8 +44,7 @@ public class JpaUserDetailsService implements UserDetailsService {
             return new HashSet<>();
         } else if (authorities.isEmpty()){
             return new HashSet<>();
-        }
-        else{
+        } else {
             return authorities.stream()
                     .map(RoleEntity::getName)
                     .map(SimpleGrantedAuthority::new)

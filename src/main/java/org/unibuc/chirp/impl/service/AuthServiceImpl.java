@@ -4,6 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,6 +29,7 @@ import org.unibuc.chirp.impl.validator.UserValidator;
 
 @Service
 @AllArgsConstructor
+@Slf4j
 public class AuthServiceImpl implements AuthService {
     private PasswordEncoder passwordEncoder;
     private UserRepository userRepository;
@@ -40,6 +42,7 @@ public class AuthServiceImpl implements AuthService {
     @Transactional
     @Override
     public void registerUser(CreateUserRequestDto createUserRequestDto) {
+        log.info("Registering user with username: {}", createUserRequestDto.username());
         userValidator.validate(createUserRequestDto);
 
         RoleEntity role = this.roleRepository.findByName("ROLE_USER").get();
@@ -52,11 +55,13 @@ public class AuthServiceImpl implements AuthService {
         this.userProfileRepository.save(UserProfileEntity.builder()
                 .user(savedUser)
                 .build());
+        log.info("Registered user with username: {}", createUserRequestDto.username());
     }
 
     @Transactional
     @Override
     public GetUserResponseDto loginUser(LoginRequestDto loginRequestDto, HttpServletRequest request) {
+        log.info("Logging in user with username: {}", loginRequestDto.username());
         UsernamePasswordAuthenticationToken authToken =
                 new UsernamePasswordAuthenticationToken(loginRequestDto.username(), loginRequestDto.password());
 
@@ -74,6 +79,7 @@ public class AuthServiceImpl implements AuthService {
     public void logoutUser(HttpServletRequest request) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
+        log.info("Logging out user with username: {}", username);
 
         HttpSession session = request.getSession(false);
         if (session != null) {
