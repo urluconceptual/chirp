@@ -8,17 +8,17 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import org.unibuc.chirp.domain.dto.conversation.create.CreateConversationRequestDto;
 import org.unibuc.chirp.domain.dto.conversation.create.ConversationResponseDto;
-import org.unibuc.chirp.domain.dto.conversation.get.GetConversationRequestDto;
+import org.unibuc.chirp.domain.dto.conversation.create.CreateConversationRequestDto;
 import org.unibuc.chirp.domain.dto.conversation.get.ConversationDetailsResponseDto;
+import org.unibuc.chirp.domain.dto.conversation.get.GetConversationRequestDto;
 import org.unibuc.chirp.domain.entity.ConversationEntity;
 import org.unibuc.chirp.domain.entity.MessageEntity;
 import org.unibuc.chirp.domain.repository.ConversationRepository;
 import org.unibuc.chirp.domain.repository.MessageRepository;
 import org.unibuc.chirp.domain.repository.UserRepository;
 import org.unibuc.chirp.domain.service.ConversationService;
-import org.unibuc.chirp.impl.service.utils.ServiceUtils;
+import org.unibuc.chirp.impl.mapper.ConversationMapper;
 import org.unibuc.chirp.impl.validator.ConversationValidator;
 import org.unibuc.chirp.impl.validator.UserValidator;
 
@@ -42,12 +42,10 @@ public class ConversationServiceImpl implements ConversationService {
         val participantUserList =
                 this.userRepository.findAllByUsernameIn(createConversationRequestDto.participantList());
 
-        val conversation = ConversationEntity.builder()
-                .title(createConversationRequestDto.title())
-                .participants(participantUserList)
-                .build();
+        val conversation = ConversationMapper.toConversationEntity(createConversationRequestDto.title(),
+                participantUserList);
 
-        return ServiceUtils.toDetailsDto(this.conversationRepository.save(conversation));
+        return ConversationMapper.toDto(this.conversationRepository.save(conversation));
     }
 
     @Override
@@ -65,7 +63,7 @@ public class ConversationServiceImpl implements ConversationService {
 
         Page<MessageEntity> messagePage = messageRepository.findMessagesByConversationId(conversationId, pageable);
 
-        return ServiceUtils.toDtoGetConversation(conversation, messagePage);
+        return ConversationMapper.toDto(conversation, messagePage);
     }
 
     @Override
@@ -75,6 +73,6 @@ public class ConversationServiceImpl implements ConversationService {
 
         List<ConversationEntity> conversations = this.conversationRepository.findByParticipantsUsername(username);
 
-        return conversations.stream().map(ServiceUtils::toDetailsDto).toList();
+        return conversations.stream().map(ConversationMapper::toDto).toList();
     }
 }
