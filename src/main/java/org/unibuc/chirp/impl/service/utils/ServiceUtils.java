@@ -2,20 +2,10 @@ package org.unibuc.chirp.impl.service.utils;
 
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.unibuc.chirp.domain.dto.conversation.create.ConversationResponseDto;
-import org.unibuc.chirp.domain.dto.conversation.get.ConversationDetailsResponseDto;
 import org.unibuc.chirp.domain.dto.message.get.GetMessageResponseDto;
-import org.unibuc.chirp.domain.dto.user.get.FriendStatus;
-import org.unibuc.chirp.domain.dto.user.get.GetUserDetailsResponseDto;
-import org.unibuc.chirp.domain.dto.user.get.GetUserResponseDto;
-import org.unibuc.chirp.domain.dto.user.update.UpdateUserResponseDto;
-import org.unibuc.chirp.domain.entity.*;
+import org.unibuc.chirp.domain.entity.MessageEntity;
 
 import java.time.format.DateTimeFormatter;
-import java.util.stream.Stream;
 
 @Slf4j
 @UtilityClass
