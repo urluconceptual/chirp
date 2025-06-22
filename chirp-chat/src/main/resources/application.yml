@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: chirpchat
+  config:
+    import: optional:configserver:http://localhost:8070/
+  profiles:
+    active: prod
+
+server:
+  port: 8082
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
