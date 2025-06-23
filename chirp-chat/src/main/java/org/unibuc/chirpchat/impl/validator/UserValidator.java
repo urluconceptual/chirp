@@ -14,12 +14,6 @@ import java.util.List;
 public class UserValidator {
     private UserRepository userRepository;
 
-    public void validate(CreateUserRequestDto createUserRequestDto) {
-        if (this.userRepository.findByUsername(createUserRequestDto.username()).isPresent()) {
-            throw new AppException(ErrorCode.CHR0001);
-        }
-    }
-
     public void validate(String username) {
         if (this.userRepository.findByUsername(username).isEmpty()) {
             throw new AppException(ErrorCode.CHR0002, "User with username " + username + " not found");

@@ -18,7 +18,6 @@ public class UserEntity {
 
     @Column(unique = true)
     private String username;
-    private String password;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
@@ -28,39 +27,4 @@ public class UserEntity {
     )
     @Builder.Default
     private Set<RoleEntity> roles = new HashSet<>();
-
-    @OneToMany(mappedBy = "sender")
-    @Builder.Default
-    private List<MessageEntity> messageList = new ArrayList<>();
-
-    @ManyToMany(mappedBy = "participants")
-    @Builder.Default
-    private List<ConversationEntity> conversationList = new ArrayList<>();
-
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    private UserProfileEntity userProfile;
-
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private UserStatusEntity status;
-
-    @OneToMany(mappedBy = "requester", fetch = FetchType.EAGER)
-    @Builder.Default
-    private List<UserFriendshipEntity> sentFriendRequests = new ArrayList<>();
-
-    @OneToMany(mappedBy = "addressee", fetch = FetchType.EAGER)
-    @Builder.Default
-    private List<UserFriendshipEntity> receivedFriendRequests = new ArrayList<>();
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        UserEntity userEntity = (UserEntity) o;
-        return Objects.equals(getId(), userEntity.getId()) &&
-                Objects.equals(getUsername(), userEntity.getUsername());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId(), getUsername());
-    }
 }

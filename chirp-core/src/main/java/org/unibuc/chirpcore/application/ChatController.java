@@ -46,28 +46,6 @@ public class ChatController {
         return "chat";
     }
 
-    @GetMapping("/messages/{chatId}")
-    public String getChatMessages(@PathVariable Long chatId, Model model) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUsername = authentication.getName();
-
-        model.addAttribute("chats", conversationService.getAllConversations(currentUsername));
-
-        var conversationDetails = conversationService.getConversation(chatId, new GetConversationRequestDto(0, 15));
-        model.addAttribute("chat", conversationDetails);
-
-        return "chat";
-    }
-
-    @GetMapping("/messages/{chatId}/page")
-    @ResponseBody
-    public ConversationDetailsResponseDto getChatMessagesPage(
-            @PathVariable Long chatId,
-            @RequestParam int page,
-            @RequestParam int size) {
-        return conversationService.getConversation(chatId, new GetConversationRequestDto(page, size));
-    }
-
     @GetMapping("/new")
     public String getNewChat(Model model,
                              @RequestParam(value = "page", defaultValue = "0") int page,
@@ -93,17 +71,5 @@ public class ChatController {
         );
         conversationService.createConversation(createConversationRequestDto);
         return "redirect:" + gatewayBaseUrl + "/core/chat";
-    }
-
-    @PostMapping("/send/{id}")
-    public String sendMessage(@PathVariable Long id,
-                              @RequestParam("message") String content) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String senderUsername = authentication.getName();
-        CreateMessageRequestDto createMessageRequestDto = new CreateMessageRequestDto(id, senderUsername, content);
-
-        messageService.send(createMessageRequestDto);
-
-        return "redirect:" + gatewayBaseUrl + "/core/chat/messages/" + id;
     }
 }

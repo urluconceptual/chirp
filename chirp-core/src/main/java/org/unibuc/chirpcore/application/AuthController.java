@@ -24,10 +24,11 @@ import org.unibuc.chirpcore.domain.service.AuthService;
 public class AuthController {
     private AuthService authService;
 
+    // todo logout doesn't work :(
     @PostMapping("/logout")
     public String logout(HttpServletRequest request) {
-        String keycloakLogoutUrl = "http://localhost:8080/realms/chirp/protocol/openid-connect/logout" +
-                "?post_logout_redirect_uri=http://localhost:8071/chirp/core/login";
+        String keycloakLogoutUrl = "http://localhost:8080/realms/chirp/protocol/openid-connect/logout?redirect_uri" +
+                "=http://localhost:8071";
         authService.logoutUser(request);
         return "redirect:" + keycloakLogoutUrl;
     }

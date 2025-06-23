@@ -8,7 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 
-import java.util.*;
+import java.util.Objects;
 
 @Controller
 public class RedirectController {
@@ -17,18 +17,20 @@ public class RedirectController {
 
     @GetMapping("/")
     public String redirectToLogin(Authentication authentication) {
-        if(Objects.isNull(authentication))
-            return "redirect:" + gatewayBaseUrl+ "/core/access_denied";
+        if (Objects.isNull(authentication))
+            return "redirect:" + gatewayBaseUrl + "/core/access_denied";
         if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))) {
-            return "redirect:" + gatewayBaseUrl+ "/core/admin/users";
+            return "redirect:" + gatewayBaseUrl + "/core/admin/users";
         } else if (authentication.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_USER"))) {
-            return "redirect:" + gatewayBaseUrl+ "/core/chat";
+            return "redirect:" + gatewayBaseUrl + "/chat/chat";
         }
-        return "redirect:" + gatewayBaseUrl+ "/core/access_denied";
+        return "redirect:" + gatewayBaseUrl + "/core/access_denied";
     }
 
     @GetMapping("/access_denied")
-    public String accessDeniedPage(){ return "access-denied"; }
+    public String accessDeniedPage() {
+        return "access-denied";
+    }
 
     @GetMapping("/debug/auth")
     public ResponseEntity<String> debug(Authentication authentication) {
@@ -36,7 +38,8 @@ public class RedirectController {
     }
 
     @GetMapping("/debug/token")
-    public ResponseEntity<String> debugToken(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+    public ResponseEntity<String> debugToken(
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
         return ResponseEntity.ok("Authorization: " + authHeader);
     }
 }
