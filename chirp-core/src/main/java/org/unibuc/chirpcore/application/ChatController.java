@@ -59,17 +59,4 @@ public class ChatController {
         model.addAttribute("friends", friendsPage);
         return "new-chat";
     }
-
-    @GetMapping("/new/start")
-    public String startNewChat(@RequestParam("friendUsername") String friendUsername,
-                               @RequestParam(required = false) String title) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUsername = authentication.getName();
-        CreateConversationRequestDto createConversationRequestDto = new CreateConversationRequestDto(
-                List.of(currentUsername, friendUsername),
-                StringUtils.isEmpty(title) ? currentUsername + "'s chat with " + friendUsername : title
-        );
-        conversationService.createConversation(createConversationRequestDto);
-        return "redirect:" + gatewayBaseUrl + "/core/chat";
-    }
 }

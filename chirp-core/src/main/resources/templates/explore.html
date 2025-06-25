@@ -59,7 +59,7 @@
                             <div class="list-group-item" th:each="user : ${users.content}">
                                 <div class="d-flex align-items-center justify-content-between">
                                     <div class="d-flex align-items-center">
-                                        <img th:src="${user.profilePicture != null} ? ${'data:image/png;base64,' + user.profilePicture} : '/chirp/core/images/default-profile.jpg'"
+                                        <img th:src="${user.profilePicture != null} ? ${'data:image/png;base64,' + user.profilePicture} : 'http://localhost:8071/chirp/core/images/default-profile.jpg'"
                                              class="rounded-circle me-3"
                                              style="width: 50px; height: 50px; object-fit: cover;"/>
                                         <div>

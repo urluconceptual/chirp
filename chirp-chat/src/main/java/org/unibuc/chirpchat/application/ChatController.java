@@ -2,11 +2,15 @@ package org.unibuc.chirpchat.application;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
+import org.unibuc.chirpchat.domain.dto.conversation.create.CreateConversationRequestDto;
 import org.unibuc.chirpchat.domain.dto.conversation.get.ConversationDetailsResponseDto;
 import org.unibuc.chirpchat.domain.dto.conversation.get.GetConversationRequestDto;
 import org.unibuc.chirpchat.domain.dto.message.create.CreateMessageRequestDto;
@@ -17,11 +21,13 @@ import java.util.List;
 
 @Controller
 @RequestMapping("/chat")
-@AllArgsConstructor
+@RequiredArgsConstructor
 @Getter
 public class ChatController {
     private final ConversationService conversationService;
     private final MessageService messageService;
+    @Value("${chirp.gateway.base-url}")
+    private String gatewayBaseUrl;
 
     @GetMapping
     public String getChat(Model model) {
@@ -64,6 +70,19 @@ public class ChatController {
 
         messageService.send(createMessageRequestDto);
 
-        return "redirect:/chat/messages/" + id;
+        return "redirect:" + gatewayBaseUrl + "/chat/chat/messages/" + id;
+    }
+
+    @GetMapping("/new/start")
+    public String startNewChat(@RequestParam("friendUsername") String friendUsername,
+                               @RequestParam(required = false) String title) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        CreateConversationRequestDto createConversationRequestDto = new CreateConversationRequestDto(
+                List.of(currentUsername, friendUsername),
+                StringUtils.isEmpty(title) ? currentUsername + "'s chat with " + friendUsername : title
+        );
+        conversationService.createConversation(createConversationRequestDto);
+        return "redirect:" + gatewayBaseUrl + "/chat/chat";
     }
 }

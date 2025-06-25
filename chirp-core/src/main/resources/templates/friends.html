@@ -49,15 +49,15 @@
                     <div th:if="${pendingRequests.isEmpty()}">No pending requests.</div>
                     <div th:each="user : ${pendingRequests}" class="mb-3">
                         <div class="d-flex align-items-center">
-                            <img th:src="${user.profilePicture != null} ? ${'data:image/png;base64,' + user.profilePicture} : '/chirp/core/images/default-profile.jpg'"
+                            <img th:src="${user.profilePicture != null} ? ${'data:image/png;base64,' + user.profilePicture} : 'http://localhost:8071/chirp/core/images/default-profile.jpg'"
                                  class="rounded-circle me-3" style="width: 50px; height: 50px;"/>
                             <div>
                                 <strong th:text="${user.username}">Username</strong>
-                                <form th:action="@{/friend/accept}" method="post" class="d-inline">
+                                <form th:action="@{http://localhost:8071/chirp/core/friend/accept}" method="post" class="d-inline">
                                     <input type="hidden" name="username" th:value="${user.username}"/>
                                     <button class="btn btn-success btn-sm ms-2">Accept</button>
                                 </form>
-                                <form th:action="@{/friend/reject}" method="post" class="d-inline">
+                                <form th:action="@{http://localhost:8071/chirp/core/friend/reject}" method="post" class="d-inline">
                                     <input type="hidden" name="username" th:value="${user.username}"/>
                                     <button class="btn btn-danger btn-sm ms-2">Reject</button>
                                 </form>
@@ -71,7 +71,7 @@
                         <div class="list-group-item" th:each="user : ${friends.content}">
                             <div class="d-flex align-items-center justify-content-between">
                                 <div class="d-flex align-items-center">
-                                    <img th:src="${user.profilePicture != null} ? ${'data:image/png;base64,' + user.profilePicture} : '/chirp/core/images/default-profile.jpg'"
+                                    <img th:src="${user.profilePicture != null} ? ${'data:image/png;base64,' + user.profilePicture} : 'http://localhost:8071/chirp/core/images/default-profile.jpg'"
                                          class="rounded-circle me-3"
                                          style="width: 50px; height: 50px; object-fit: cover;"/>
                                     <div>
